@@ -17,6 +17,40 @@ Per scrip: sale value − cost of acquisition = gain; record buy/sell dates (for
 holding period) and confirm STT was paid (makes it 111A/112A rather than the
 slab/other rate). Cross-check the sale proceeds against the bank credit.
 
+### Deduct Section 48 transfer expenses — but never STT
+The gain is **net of transfer expenses** under Section 48: brokerage, exchange /
+clearing charges, SEBI turnover fees, stamp duty, and GST on brokerage are all
+deductible. **STT is specifically NOT deductible** (barred by the proviso to
+Section 48) — leave it out of the cost/expense figure. Broker "Tax P&L" reports
+list these charges per segment (equity and non-equity separately); subtract them
+(ex-STT) from each bucket. A raw *sale − buy* figure that ignores these charges
+**overstates the gain** and the tax. This matters for **every** bucket — 111A,
+112A, and slab-rate/non-equity STCG alike.
+### Non-equity ETFs / debt funds are NOT 111A — usually slab rate
+Watch the asset type before assuming 111A/112A:
+- **Gold / silver ETFs** (not equity-oriented): held ≤ 12 months → **STCG at
+  slab (applicable) rate**, reported under CG section A "sale of assets other
+  than A1–A4", not 111A. Longer holdings follow the current-year LTCG rule for
+  such assets — confirm the holding-period threshold and rate for the year.
+- **Liquid / debt ETFs and debt mutual funds** are typically **"specified mutual
+  funds" u/s 50AA** → gains taxed at **slab rate regardless of holding period**.
+These slab-rate STCG amounts add to normal income (not Schedule SI) and are taxed
+at the taxpayer's slab — which can be *higher* than the 111A rate for high
+earners.
+### Set-off ordering (do it in this sequence)
+1. **Current-year losses first.** A current-year 111A loss (or LTCG loss) is set
+   off intra-head against current-year capital gains — e.g. a 111A loss can
+   reduce slab-rate STCG. A **LTCG loss sets off only against LTCG**.
+2. **Brought-forward capital losses next**, via Schedule BFLA. Brought-forward
+   STCG loss sets off against any current-year STCG (any rate); brought-forward
+   LTCG loss against LTCG only.
+3. **Carry forward the excess.** If the brought-forward loss exceeds this year's
+   gain, the balance carries forward (Schedule CFL) for up to 8 AYs. Confirm the
+   residual STCG/LTCG loss actually appears in Schedule CFL for next year.
+Set-off of a brought-forward loss is **mandatory** to the extent gains exist —
+you can't choose to carry it forward while showing taxable gains.
+
+
 ### Quarterly breakup matters (for 234C interest)
 
 Schedule CG asks for capital gains split by the quarter in which they accrued
