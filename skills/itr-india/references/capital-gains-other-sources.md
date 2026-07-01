@@ -38,7 +38,7 @@ the special-rate tax equals gain × the special rate.
   interest is taxed at slab rate. Sum interest across **all** banks (including
   ones missing from AIS).
 - **Dividends:** taxable at slab rate. If dividend exceeds ₹10k from a payer, TDS
-  u/s 194 may appear in 26AS — reconcile.
+  u/s 194 may appear in 26AS — reconcile. Dividends need a quarter-wise breakup in Schedule OS (upto 15/6, 16/6–15/9, 16/9–15/12, 16/12–15/3, 16/3–31/3) — the portal uses it for 234C. Build it from the broker's dividend statement (date-wise ledger), not the single AIS total. Strictly it's date of receipt/credit; ex-date is a fine proxy and the difference is immaterial when the return is in a refund position. 
 - Other items (gifts > ₹50k u/s 56(2)(x), family pension, winnings u/s
   115BB/115BBJ at special rates) only if applicable.
 
