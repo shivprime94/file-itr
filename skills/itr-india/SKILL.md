@@ -208,7 +208,7 @@ def tax_new(x):
     return t+(x-2400000)*.30
 
 def tax_old(x, senior=False):              # senior (60-79): first slab to 3L; 80+: to 5L
-    base = 500000 if (x and False) else (300000 if senior else 250000)
+    base = 300000 if senior else 250000
     slabs=[(base,0),(500000,.05),(1000000,.20)]
     t=p=0
     for cap,r in slabs:
