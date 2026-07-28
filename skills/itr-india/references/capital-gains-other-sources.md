@@ -17,7 +17,53 @@ Per scrip: sale value − cost of acquisition = gain; record buy/sell dates (for
 holding period) and confirm STT was paid (makes it 111A/112A rather than the
 slab/other rate). Cross-check the sale proceeds against the bank credit.
 
+### Equity-oriented or not? Let the AIS decide
+
+The single most consequential classification call for mutual-fund gains is
+equity-oriented (111A/112A special rates, 112A's annual exemption — ₹1.25L for
+AY 2025-26/2026-27) vs non-equity (slab STCG, 12.5% no-indexation LTCG after
+24 months, or always-slab u/s 50AA for post-Apr-2023 "specified" debt funds).
+Tax software and even CA computations get this wrong routinely — typically by
+dumping equity-fund LTCG into "other than 112A" (losing the ₹1.25L exemption)
+or equity-fund STCG into slab income (30% instead of the 111A rate).
+
+Don't classify by fund name or gut feel — the **AIS information code is
+authoritative evidence**:
+
+- **SFT-18-EMF "Sale of unit of equity oriented mutual fund"** (with an STT
+  amount on each row) → 111A/112A applies.
+- **SFT-18-OTU "Sale of other unit"** (STT column zero) → non-equity rules.
+- **SFT-17-LES "Sale of listed equity share"** → 111A/112A applies.
+
+Traps to check explicitly:
+
+- **Arbitrage funds** (Nippon/PPFAS/WhiteOak Arbitrage etc.) are equity-oriented
+  despite behaving like debt — 111A/112A, not slab.
+- **Balanced-advantage / dynamic asset allocation and liquid funds** are usually
+  NOT equity-oriented — slab STCG, and the CA treating them at slab is correct.
+- **Switch-outs count as redemptions** and carry STT for equity funds; they get
+  the same 111A/112A treatment as normal redemptions.
+- When reviewing someone else's computation, reproduce their total first under
+  their classification — if it matches to the rupee, the disagreement is pure
+  classification and the AIS codes settle it.
+
+### Non-equity ETFs / debt funds are NOT 111A — usually slab rate
+
+Watch the asset type before assuming 111A/112A:
+
+- **Gold / silver ETFs** (not equity-oriented): held ≤ 12 months → **STCG at
+  slab (applicable) rate**, reported under CG section A "sale of assets other
+  than A1–A4", not 111A. Longer holdings follow the current-year LTCG rule for
+  such assets — confirm the holding-period threshold and rate for the year.
+- **Liquid / debt ETFs and debt mutual funds** are typically **"specified mutual
+  funds" u/s 50AA** → gains taxed at **slab rate regardless of holding period**.
+
+These slab-rate STCG amounts add to normal income (not Schedule SI) and are taxed
+at the taxpayer's slab — which can be *higher* than the 111A rate for high
+earners.
+
 ### Deduct Section 48 transfer expenses — but never STT
+
 The gain is **net of transfer expenses** under Section 48: brokerage, exchange /
 clearing charges, SEBI turnover fees, stamp duty, and GST on brokerage are all
 deductible. **STT is specifically NOT deductible** (barred by the proviso to
@@ -26,18 +72,9 @@ list these charges per segment (equity and non-equity separately); subtract them
 (ex-STT) from each bucket. A raw *sale − buy* figure that ignores these charges
 **overstates the gain** and the tax. This matters for **every** bucket — 111A,
 112A, and slab-rate/non-equity STCG alike.
-### Non-equity ETFs / debt funds are NOT 111A — usually slab rate
-Watch the asset type before assuming 111A/112A:
-- **Gold / silver ETFs** (not equity-oriented): held ≤ 12 months → **STCG at
-  slab (applicable) rate**, reported under CG section A "sale of assets other
-  than A1–A4", not 111A. Longer holdings follow the current-year LTCG rule for
-  such assets — confirm the holding-period threshold and rate for the year.
-- **Liquid / debt ETFs and debt mutual funds** are typically **"specified mutual
-  funds" u/s 50AA** → gains taxed at **slab rate regardless of holding period**.
-These slab-rate STCG amounts add to normal income (not Schedule SI) and are taxed
-at the taxpayer's slab — which can be *higher* than the 111A rate for high
-earners.
+
 ### Set-off ordering (do it in this sequence)
+
 1. **Current-year losses first.** A current-year 111A loss (or LTCG loss) is set
    off intra-head against current-year capital gains — e.g. a 111A loss can
    reduce slab-rate STCG. A **LTCG loss sets off only against LTCG**.
@@ -47,9 +84,17 @@ earners.
 3. **Carry forward the excess.** If the brought-forward loss exceeds this year's
    gain, the balance carries forward (Schedule CFL) for up to 8 AYs. Confirm the
    residual STCG/LTCG loss actually appears in Schedule CFL for next year.
+
 Set-off of a brought-forward loss is **mandatory** to the extent gains exist —
 you can't choose to carry it forward while showing taxable gains.
 
+### 87A rebate vs special-rate gains (new regime, AY 2026-27 on)
+
+The Section 87A rebate (total income ≤ ₹12L → rebate up to ₹60,000) applies
+only to **slab-rate** tax — not to 111A/112A/112 special-rate tax. So non-equity
+fund STCG (slab) is effectively rebateable, while even ₹1 of equity STCG u/s
+111A produces tax a sub-₹12L filer must actually pay. Equity LTCG within the
+112A ₹1.25L exemption is nil regardless.
 
 ### Quarterly breakup matters (for 234C interest)
 
