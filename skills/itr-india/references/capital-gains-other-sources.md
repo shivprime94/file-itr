@@ -78,9 +78,10 @@ list these charges per segment (equity and non-equity separately); subtract them
 1. **Current-year losses first.** A current-year 111A loss (or LTCG loss) is set
    off intra-head against current-year capital gains — e.g. a 111A loss can
    reduce slab-rate STCG. A **LTCG loss sets off only against LTCG**.
-2. **Brought-forward capital losses next**, via Schedule BFLA. Brought-forward
-   STCG loss sets off against any current-year STCG (any rate); brought-forward
-   LTCG loss against LTCG only.
+2. **Brought-forward capital losses next**, via Schedule BFLA. A brought-forward
+   **short-term** loss sets off against **any** current-year capital gain — STCG
+   (any rate) *or* LTCG; a brought-forward **long-term** loss sets off against
+   **LTCG only** (Section 74).
 3. **Carry forward the excess.** If the brought-forward loss exceeds this year's
    gain, the balance carries forward (Schedule CFL) for up to 8 AYs. Confirm the
    residual STCG/LTCG loss actually appears in Schedule CFL for next year.
@@ -102,7 +103,11 @@ Schedule CG asks for capital gains split by the quarter in which they accrued
 (up to 15 Jun / 16 Jun–15 Sep / 16 Sep–15 Dec / 16 Dec–15 Mar / 16–31 Mar).
 **Put the gain in the correct quarter** — the portal uses it to compute Section
 234C interest for deferment of advance tax. Putting it in the wrong quarter
-mis-states the interest.
+mis-states the interest. **234C relief (proviso to s.234C(1)):** where the
+shortfall is because a capital gain (or dividend) could not be foreseen, no 234C
+interest applies to it **provided** the whole tax on that income is paid in the
+advance-tax instalments falling due after it accrued (or by 31 Mar) — which is
+exactly why putting the gain in the correct quarter matters.
 
 ### Flow downstream
 
@@ -117,7 +122,7 @@ the special-rate tax equals gain × the special rate.
   interest is taxed at slab rate. Sum interest across **all** banks (including
   ones missing from AIS).
 - **Dividends:** taxable at slab rate. If dividend exceeds ₹10k from a payer, TDS
-  u/s 194 may appear in 26AS — reconcile. Dividends need a quarter-wise breakup in Schedule OS (upto 15/6, 16/6–15/9, 16/9–15/12, 16/12–15/3, 16/3–31/3) — the portal uses it for 234C. Build it from the broker's dividend statement (date-wise ledger), not the single AIS total. Strictly it's date of receipt/credit; ex-date is a fine proxy and the difference is immaterial when the return is in a refund position. 
+  u/s 194 may appear in 26AS — reconcile. Dividends need a quarter-wise breakup in Schedule OS (upto 15/6, 16/6–15/9, 16/9–15/12, 16/12–15/3, 16/3–31/3) — the portal uses it for 234C. Build it from the broker's dividend statement (date-wise ledger), not the single AIS total. Strictly it's date of receipt/credit; ex-date is a fine proxy and the difference is immaterial when the return is in a refund position.
 - Other items (gifts > ₹50k u/s 56(2)(x), family pension, winnings u/s
   115BB/115BBJ at special rates) only if applicable.
 
