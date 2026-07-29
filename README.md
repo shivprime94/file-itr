@@ -78,14 +78,14 @@ Skills live under a `skills/` directory that Claude Code reads. Either:
 
 **A) Clone into your project's skills folder**
 ```bash
-git clone https://github.com/<your-username>/file-itr.git
+git clone https://github.com/shivprime94/file-itr.git
 mkdir -p .claude/skills
 cp -r file-itr/skills/itr-india .claude/skills/
 ```
 
 **B) Install for all projects (user-level)**
 ```bash
-git clone https://github.com/<your-username>/file-itr.git
+git clone https://github.com/shivprime94/file-itr.git
 mkdir -p ~/.claude/skills
 cp -r file-itr/skills/itr-india ~/.claude/skills/
 ```
