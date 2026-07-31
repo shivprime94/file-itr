@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from typing import Optional
-from engine.interest import InterestComputation, compute_interest
+from engine.interest import InterestComputation, compute_interest, tax_credits
 from engine.model import Taxpayer
 from engine.rates import TaxComputation, compute_tax
 from engine.rulebase import RuleTable
@@ -61,8 +61,9 @@ def compute(taxpayer: Taxpayer, items: list, *, bf_losses: list = (),
         trace.add(line)
 
     interest_total = interest.total if interest else Decimal("0")
-    advance_total = sum((p.amount for p in advance_payments), Decimal("0"))
-    credits = max(tds, Decimal("0")) + advance_total
+    # Same payment window as interest: ignore pre-FY challans; count FY advance
+    # and post-FY self-assessment toward credits.
+    credits = tax_credits(tds, list(advance_payments), taxpayer.ay)
     net = tax.total_tax + interest_total - credits
     return Computation(setoff=setoff, tax=tax, interest=interest,
                        trace=trace, total_credits=credits,

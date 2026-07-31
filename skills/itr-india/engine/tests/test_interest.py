@@ -255,6 +255,40 @@ def test_234a_part_month_counts_full():
     assert r.i234a == Decimal("2160")
 
 
+def test_234a_reduces_base_by_sat_paid_on_or_before_due_date():
+    # Advance 100000; SAT 108000 on 1 Aug (before due 15 Sep); filed late 20 Oct.
+    # Unpaid base after SAT is 0 → 234A is 0 (not 2160).
+    t = tax_of(normal=2000000)
+    r = run(t, payments=[
+        pay(date(2026, 3, 10), 100000),
+        pay(date(2026, 8, 1), 108000),
+    ], self_assessment_date=date(2026, 8, 1),
+       due_date=date(2026, 9, 15), filing_date=date(2026, 10, 20))
+    assert r.i234a == Decimal("0")
+
+
+def test_prior_fy_payment_does_not_count_as_advance():
+    # Prior-FY challan must not zero 234B/234C.
+    t = tax_of(normal=2000000)
+    r = run(t, payments=[pay(date(2024, 6, 15), 208000)],
+            self_assessment_date=date(2026, 7, 15))
+    assert r.i234b > 0
+    assert r.i234c > 0
+
+
+def test_234c_post_last_instalment_cg_unpaid_by_mar31_attracts_interest():
+    # 112A sold 20 Mar (after 15 Mar due). Carve would zero March shortfall, but
+    # proviso needs tax paid by 31 Mar — nothing paid → 1% × 1 month on late CG tax.
+    item = CapitalGainItem(AssetClass.EQUITY_MF_STT, date(2023, 1, 1), date(2026, 3, 20),
+                           Decimal("1425000"), Decimal("100000"), stt_paid=True)
+    # Only the 112A gain: normal=0 so net tax is pure special (+cess).
+    t = tax_of(normal=0, s112a=1325000)
+    late_tax = t.special_tax[Bucket.LTCG_112A] * Decimal("1.04")  # + cess
+    r = run(t, items=[item], self_assessment_date=date(2026, 7, 15))
+    base = (int(late_tax) // 100) * 100
+    assert r.i234c == Decimal(base) * Decimal("0.01")
+
+
 def test_total_is_sum_of_components():
     t = tax_of(normal=2000000)
     r = run(t, payments=[pay(date(2026, 3, 10), 100000)],

@@ -51,6 +51,35 @@ def _instalment_due(fy_start: int, month: int, day: int) -> date:
     return date(fy_start + 1 if month < 4 else fy_start, month, day)
 
 
+def fy_bounds(ay: int) -> tuple[date, date]:
+    """Previous year for AY `ay`: 1 Apr (ay-2) … 31 Mar (ay-1)."""
+    return date(ay - 2, 4, 1), date(ay - 1, 3, 31)
+
+
+def classify_payments(payments: list, ay: int) -> tuple[Decimal, list]:
+    """Split challans into FY advance total and the post-FY list (SAT candidates).
+
+    Payments dated before the FY start are ignored (wrong year) — they must not
+    reduce 234A/B/C or inflate tax credits.
+    """
+    fy_lo, fy_hi = fy_bounds(ay)
+    advance = Decimal("0")
+    post_fy = []
+    for p in payments:
+        if fy_lo <= p.paid_on <= fy_hi:
+            advance += p.amount
+        elif p.paid_on > fy_hi:
+            post_fy.append(p)
+    return advance, post_fy
+
+
+def tax_credits(tds: Decimal, payments: list, ay: int) -> Decimal:
+    """TDS/TCS + challans dated on/after FY start (advance + self-assessment)."""
+    fy_lo, _ = fy_bounds(ay)
+    paid = sum((p.amount for p in payments if p.paid_on >= fy_lo), Decimal("0"))
+    return max(tds, Decimal("0")) + paid
+
+
 def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
                      taxpayer: Taxpayer, table: RuleTable, ay_ref_date: date,
                      items: list = (), self_assessment_date: date = None,
@@ -58,16 +87,21 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
                      ) -> InterestComputation:
     """Phase 4: s.234A/234B/234C interest on the Phase 3 tax figure.
 
-    `tds` covers TDS/TCS credit; `payments` are advance-tax challans (payments
-    dated within the FY count as advance tax). `items` are needed only for the
-    s.234C capital-gains carve-out; without them, all income is treated as
-    foreseeable from the first instalment (never understates interest).
+    `tds` covers TDS/TCS credit; `payments` are challans — only those dated in
+    the previous year count as advance tax; post-FY payments with
+    `paid_on <= due_date` reduce the s.234A base (self-assessment). `items` are
+    needed only for the s.234C capital-gains carve-out; without them, all
+    income is treated as foreseeable from the first instalment (never
+    understates interest).
     """
+    if tds < 0:
+        raise OutOfScopeError("tds/tcs credit cannot be negative")
+
     rate = table.get("interest.rate_pm", ay_ref_date).value
     m100 = table.get("rule119a.interest_base_round_down", ay_ref_date).value
     net = max(tax.total_tax - tds, Decimal("0"))
-    apr1 = date(taxpayer.ay - 1, 4, 1)
-    advance_total = sum((p.amount for p in payments if p.paid_on < apr1), Decimal("0"))
+    fy_lo, fy_hi = fy_bounds(taxpayer.ay)
+    advance_total, post_fy = classify_payments(payments, taxpayer.ay)
 
     # --- 234A: late filing ---
     i234a = Decimal("0")
@@ -75,7 +109,11 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
         if due_date is None:
             raise OutOfScopeError("s.234A needs both filing_date and due_date")
         if filing_date > due_date:
-            base = _round_down(net - advance_total, m100)
+            # Self-assessment / other post-FY tax paid on or before the return
+            # due date reduces the unpaid-tax base (s.234A r/w s.140A).
+            sat = sum((p.amount for p in post_fy if p.paid_on <= due_date),
+                      Decimal("0"))
+            base = _round_down(net - advance_total - sat, m100)
             i234a = base * rate * _months_late(due_date, filing_date)
 
     # --- advance-tax obligation gates (s.208 / s.207(2)) ---
@@ -114,6 +152,8 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
     )
     schedule = table.get(schedule_key, ay_ref_date).value
     first_due = _instalment_due(fy_start, schedule[0][0], schedule[0][1])
+    last_due = _instalment_due(fy_start, schedule[-1][0], schedule[-1][1])
+    mar31 = fy_hi  # 31 Mar of the FY
     cess = table.get("cess.health_education", ay_ref_date).value
 
     # Per-item tax attribution for the carve-out (proviso to s.234C(1)).
@@ -149,12 +189,25 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
     for month, day, cum, safe, nmonths in schedule:
         due = _instalment_due(fy_start, month, day)
         carved = sum((amt for sale, amt in carve_items if sale > due), Decimal("0"))
-        annual = net - carved
-        paid = sum((p.amount for p in payments if p.paid_on <= due), Decimal("0"))
+        annual = max(net - carved, Decimal("0"))
+        # Only FY advance challans count toward instalment compliance.
+        paid = sum((p.amount for p in payments
+                    if fy_lo <= p.paid_on <= due), Decimal("0"))
         if safe and paid >= Decimal(safe) * annual:
             continue
         shortfall = Decimal(cum) * annual - paid
         if shortfall > 0:
             i234c += _round_down(shortfall, m100) * rate * nmonths
+
+    # Proviso to s.234C(1): CG accruing after the last instalment is carved out
+    # only if the tax on it is paid by 31 March. Otherwise charge 1% for one
+    # month on the uncovered late-CG amount.
+    late_cg = sum((amt for sale, amt in carve_items if sale > last_due), Decimal("0"))
+    if late_cg > 0:
+        paid_to_mar31 = sum((p.amount for p in payments
+                             if fy_lo <= p.paid_on <= mar31), Decimal("0"))
+        uncovered = min(late_cg, max(net - paid_to_mar31, Decimal("0")))
+        if uncovered > 0:
+            i234c += _round_down(uncovered, m100) * rate * 1
 
     return InterestComputation(i234a, i234b, i234c, i234a + i234b + i234c)
