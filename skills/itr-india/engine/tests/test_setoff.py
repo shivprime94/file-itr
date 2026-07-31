@@ -170,6 +170,17 @@ def test_bf_last_usable_year_boundary():
     assert r.buckets[Bucket.STCG_111A] == Decimal("40000")
 
 
+def test_bf_remainder_on_last_usable_year_expires_not_carried():
+    # AY 2019 loss usable through AY 2027. Absorb 30k of 100k; remainder must
+    # die under s.74(2), not reappear as carry_forward for AY 2028+.
+    r = run([st_111a(30000)], [bf(CFLossKind.STCL, 2019, 100000)])
+    assert r.buckets[Bucket.STCG_111A] == Decimal("0")
+    assert r.carry_forward == []
+    [d] = [x for x in r.dead if "remainder expires" in x.reason]
+    assert d.amount == Decimal("70000")
+    assert d.rule_key == "s74.cf_years"
+
+
 def test_bf_without_timely_return_is_dead_not_carried():
     r = run([st_111a(50000)], [bf(CFLossKind.STCL, 2024, 10000, timely=False)])
     assert r.buckets[Bucket.STCG_111A] == Decimal("50000")

@@ -144,8 +144,17 @@ def apply_setoff(items: list, bf_losses: list, taxpayer: Taxpayer,
             rem = _absorb(bfl.amount, label, lt_order, buckets,
                           "s74.cf_ltcl_setoff_ltcg_only", steps)
         if rem > 0:
-            carry.append(CarryForwardOut(bfl.kind, bfl.ay_incurred, rem,
-                                         usable_through, False))
+            # s.74(2): the loss is usable through ay_incurred + 8. Remainder
+            # left after set-off in that last usable AY expires — it must not
+            # reappear as carry_forward for a later year.
+            if taxpayer.ay >= usable_through:
+                dead.append(DeadLoss(
+                    label, rem, "s74.cf_years",
+                    f"s.74(2): unabsorbed remainder expires after last usable "
+                    f"AY {usable_through}"))
+            else:
+                carry.append(CarryForwardOut(bfl.kind, bfl.ay_incurred, rem,
+                                             usable_through, False))
 
     # Unabsorbed current-year losses carry forward from this AY (s.74(1)),
     # conditional on this year's return meeting s.80/139(3).
