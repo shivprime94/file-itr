@@ -28,15 +28,19 @@ but almost no other deductions/exemptions.
 | above ₹24,00,000 | 30% |
 
 - **Standard deduction:** ₹75,000 against salary (once per person).
-- **87A rebate (as amended by Finance Act 2025):** special-rate income (111A/
-  112/112A, VDA) is excluded **both** from the ₹12,00,000 eligibility test
-  **and** from what the rebate can offset — not just the latter. So a filer
-  with ₹11L slab income and ₹3L of LTCG is still fully rebated on the ₹11L
-  (nil slab tax), even though their *total* income is ₹14L; only compare
-  slab-rate income (income minus special-rate income) against ₹12L. Marginal
-  relief above that ₹12L line is computed on the same slab-only figure. This
-  reading is contested/not primary-source-confirmed in this repo — see
-  `engine/rules/ay2026_27.py`'s `rebate.87a_new` for the citations and caveat.
+- **87A rebate (as amended by Finance Act 2025):** income chargeable at special
+  rates under **111A / 112 / 112A** is excluded **both** from the ₹12,00,000
+  eligibility test **and** from what the rebate can offset. So a filer with
+  ₹11L slab income and ₹3L of 112A LTCG is still fully rebated on the ₹11L
+  (nil slab tax), even though their *total* income is ₹14L — compare
+  **slab-base** (normal + slab-rate STCG) against ₹12L, not total income.
+  Marginal relief above that line uses the same slab-base figure. Sources for
+  that reading address 111A/112/112A only (see `engine/rules/ay2026_27.py`
+  `rebate.87a_new`). **VDA (s.115BBH)** is a separate Chapter-XII regime: this
+  repo does **not** treat VDA as settled-excluded from the ₹12L test. If
+  counting VDA toward the threshold would change the rebate, do not auto-
+  rebate — check the portal / a primary source (the independent engine
+  fails loud in that case rather than guessing).
 - Slabs are the same regardless of age (no separate senior-citizen slabs in new
   regime).
 
