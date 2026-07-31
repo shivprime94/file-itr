@@ -41,6 +41,16 @@ def _months_late(due: date, filed: date) -> int:
     return max(m, 0)
 
 
+def _instalment_due(fy_start: int, month: int, day: int) -> date:
+    """Calendar date of an s.234C instalment within the FY beginning `fy_start`.
+
+    Months Jan–Mar fall in the FY's closing calendar year (fy_start+1); Apr–Dec
+    fall in the opening year. Shared by the schedule loop and first_due so
+    presumptive March-only schedules do not land a year early.
+    """
+    return date(fy_start + 1 if month < 4 else fy_start, month, day)
+
+
 def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
                      taxpayer: Taxpayer, table: RuleTable, ay_ref_date: date,
                      items: list = (), self_assessment_date: date = None,
@@ -103,7 +113,7 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
         if single_instalment else "s234c.schedule"
     )
     schedule = table.get(schedule_key, ay_ref_date).value
-    first_due = date(fy_start, schedule[0][0], schedule[0][1])
+    first_due = _instalment_due(fy_start, schedule[0][0], schedule[0][1])
     cess = table.get("cess.health_education", ay_ref_date).value
 
     # Per-item tax attribution for the carve-out (proviso to s.234C(1)).
@@ -137,7 +147,7 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
 
     i234c = Decimal("0")
     for month, day, cum, safe, nmonths in schedule:
-        due = date(fy_start + 1 if month < 4 else fy_start, month, day)
+        due = _instalment_due(fy_start, month, day)
         carved = sum((amt for sale, amt in carve_items if sale > due), Decimal("0"))
         annual = net - carved
         paid = sum((p.amount for p in payments if p.paid_on <= due), Decimal("0"))

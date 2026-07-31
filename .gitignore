@@ -20,3 +20,6 @@ __pycache__/
 
 # Local brainstorming/planning docs — not for the repo
 docs/superpowers/
+
+# Local agent / workflow state — not for the repo
+.grok/

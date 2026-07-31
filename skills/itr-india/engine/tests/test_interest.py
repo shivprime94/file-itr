@@ -172,6 +172,33 @@ def test_234c_section_44ae_keeps_ordinary_quarterly_schedule():
     assert r.i234c == Decimal("8424")
 
 
+def test_234c_presumptive_first_due_year_roll_allows_in_fy_slab_stcg():
+    # first_due for 44ADA is 15 Mar of the FY's closing year (2026-03-15 for
+    # AY 2027), not 15 Mar of fy_start (2025-03-15). An in-FY slab STCG sold
+    # before that due must not raise the "sold after the first instalment" OOS.
+    presumptive = Taxpayer(
+        ay=2027,
+        resident=True,
+        age_band=AgeBand.BELOW_60,
+        regime=Regime.NEW,
+        presumptive_scheme=PresumptiveScheme.SECTION_44ADA,
+    )
+    # Gold ETF held < 12m → STCG_SLAB; sale in May 2025 is before 15 Mar 2026.
+    item = CapitalGainItem(
+        AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2025, 5, 15),
+        Decimal("200000"), Decimal("100000"),
+    )
+    b = {Bucket.NORMAL: Decimal(2000000), Bucket.STCG_SLAB: Decimal(100000),
+         Bucket.STCG_111A: Decimal(0), Bucket.LTCG_112: Decimal(0),
+         Bucket.LTCG_112A: Decimal(0), Bucket.VDA_115BBH: Decimal(0)}
+    t = compute_tax(b, presumptive, TABLE, REF)
+    r = run(t, taxpayer=presumptive, items=[item],
+            self_assessment_date=date(2026, 7, 15))
+    # Does not raise; single March instalment on full net (1% × 1 month).
+    base = (int(t.total_tax) // 100) * 100
+    assert r.i234c == Decimal(base) * Decimal("0.01")
+
+
 def test_234c_carveout_for_late_year_capital_gain():
     # 112A gain realised 20 Jan: its tax is excluded from the Jun/Sep/Dec
     # requirements (proviso to s.234C(1)); only the March instalment needs it.
