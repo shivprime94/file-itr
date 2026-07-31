@@ -1,8 +1,10 @@
 from datetime import date
 from decimal import Decimal
 import pytest
-from engine.model import (Regime, AgeBand, AssetClass, Taxpayer, CapitalGainItem, VdaItem,
-                          _add_months)
+from engine.model import (
+    Regime, AgeBand, AssetClass, PresumptiveScheme, Taxpayer, CapitalGainItem,
+    VdaItem, _add_months,
+)
 
 
 def test_capitalgain_gain_and_holding():
@@ -31,6 +33,19 @@ def test_taxpayer_constructs():
     tp = Taxpayer(ay=2027, resident=True, age_band=AgeBand.BELOW_60, regime=Regime.NEW)
     assert tp.ay == 2027
     assert tp.has_business_or_profession_income is False
+    assert tp.presumptive_scheme is PresumptiveScheme.NONE
+    assert tp.has_pgbp_income is False
+
+
+def test_presumptive_scheme_implies_pgbp_income():
+    tp = Taxpayer(
+        ay=2027,
+        resident=True,
+        age_band=AgeBand.BELOW_60,
+        regime=Regime.NEW,
+        presumptive_scheme=PresumptiveScheme.SECTION_44ADA,
+    )
+    assert tp.has_pgbp_income is True
 
 
 def test_add_months_clamps_to_month_end():

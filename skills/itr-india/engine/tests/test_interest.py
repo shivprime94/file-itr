@@ -2,7 +2,8 @@ from datetime import date
 from decimal import Decimal
 import pytest
 from engine.model import (
-    AdvanceTaxPayment, AgeBand, AssetClass, CapitalGainItem, Regime, Taxpayer, VdaItem,
+    AdvanceTaxPayment, AgeBand, AssetClass, CapitalGainItem, PresumptiveScheme,
+    Regime, Taxpayer, VdaItem,
 )
 from engine.rules.ay2026_27 import TABLE
 from engine.rates import compute_tax
@@ -116,6 +117,59 @@ def test_234c_safe_harbor_12_percent_june():
         pay(date(2026, 3, 10), int(net * Decimal("0.25")) + 1),
     ], self_assessment_date=date(2026, 7, 15))
     assert r.i234c == Decimal("0")
+
+
+@pytest.mark.parametrize(
+    "scheme",
+    [PresumptiveScheme.SECTION_44AD, PresumptiveScheme.SECTION_44ADA],
+)
+def test_234c_presumptive_44ad_44ada_due_in_full_only_by_march(scheme):
+    presumptive = Taxpayer(
+        ay=2027,
+        resident=True,
+        age_band=AgeBand.BELOW_60,
+        regime=Regime.NEW,
+        presumptive_scheme=scheme,
+    )
+    t = tax_of(normal=2000000, taxpayer=presumptive)
+    r = run(
+        t,
+        taxpayer=presumptive,
+        payments=[pay(date(2026, 3, 10), 208000)],
+        self_assessment_date=date(2026, 7, 15),
+    )
+    assert r.i234c == Decimal("0")
+
+
+def test_234c_presumptive_shortfall_is_one_percent_for_march_only():
+    presumptive = Taxpayer(
+        ay=2027,
+        resident=True,
+        age_band=AgeBand.BELOW_60,
+        regime=Regime.NEW,
+        presumptive_scheme=PresumptiveScheme.SECTION_44ADA,
+    )
+    t = tax_of(normal=2000000, taxpayer=presumptive)
+    r = run(t, taxpayer=presumptive, self_assessment_date=date(2026, 7, 15))
+    assert r.i234c == Decimal("2080")
+
+
+def test_234c_section_44ae_keeps_ordinary_quarterly_schedule():
+    transporter = Taxpayer(
+        ay=2027,
+        resident=True,
+        age_band=AgeBand.BELOW_60,
+        regime=Regime.NEW,
+        presumptive_scheme=PresumptiveScheme.SECTION_44AE,
+    )
+    t = tax_of(normal=2000000, taxpayer=transporter)
+    r = run(
+        t,
+        taxpayer=transporter,
+        payments=[pay(date(2026, 3, 10), 208000)],
+        self_assessment_date=date(2026, 7, 15),
+    )
+    assert r.i234c == Decimal("8424")
 
 
 def test_234c_carveout_for_late_year_capital_gain():

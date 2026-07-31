@@ -27,6 +27,13 @@ class AgeBand(Enum):
     SUPER_SENIOR = "super_senior"  # 80+
 
 
+class PresumptiveScheme(Enum):
+    NONE = "none"
+    SECTION_44AD = "44ad"
+    SECTION_44ADA = "44ada"
+    SECTION_44AE = "44ae"
+
+
 class AssetClass(Enum):
     LISTED_EQUITY_STT = "listed_equity_stt"
     EQUITY_MF_STT = "equity_mf_stt"
@@ -48,6 +55,17 @@ class Taxpayer:
     # profession". Keep the default for callers created before this field was
     # introduced, while making ITR-3/4 callers state the disqualifier.
     has_business_or_profession_income: bool = False
+    # Sections 44AD and 44ADA use the single-instalment s.234C schedule:
+    # 100% advance tax by 15 March. Section 44AE does not receive that
+    # statutory concession and remains on the ordinary quarterly schedule.
+    presumptive_scheme: PresumptiveScheme = PresumptiveScheme.NONE
+
+    @property
+    def has_pgbp_income(self) -> bool:
+        return (
+            self.has_business_or_profession_income
+            or self.presumptive_scheme is not PresumptiveScheme.NONE
+        )
 
 
 @dataclass(frozen=True)

@@ -76,3 +76,17 @@ Presumptive income @ 50% (62ii)   25,000
 - If the user's real profit is **below** 50% / 8%, declaring the lower actual
   profit requires maintaining books and a tax audit. Most small creators simply
   declare the presumptive % and move on.
+
+## Advance tax: one instalment for 44AD / 44ADA
+
+A taxpayer declaring profits under **section 44AD(1) or 44ADA(1)** does not use
+the ordinary June/September/December/March advance-tax percentages. The whole
+advance-tax liability is due by **15 March**. A shortfall at that date attracts
+section 234C interest for one month; section 234B can still apply after year-end.
+
+This concession is specific to 44AD and 44ADA. Do not extend it to section 44AE
+merely because 44AE is also a presumptive scheme used in ITR-4.
+
+Sources: Income Tax Department,
+[advance-tax FAQ](https://www.incometaxindia.gov.in/w/who-is-not-required-to-pay-advance-tax-)
+and [Finance Act 2017 amendment of section 234C](https://www.incometaxindia.gov.in/w/section-75-86).

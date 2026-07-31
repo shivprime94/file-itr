@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from engine.buckets import Bucket, classify
-from engine.model import AdvanceTaxPayment, AgeBand, Taxpayer, VdaItem
+from engine.model import (
+    AdvanceTaxPayment, AgeBand, PresumptiveScheme, Taxpayer, VdaItem,
+)
 from engine.rates import TaxComputation
 from engine.rulebase import RuleTable
 from engine.scope import OutOfScopeError
@@ -70,7 +72,7 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
     senior_exempt = (
         taxpayer.resident
         and taxpayer.age_band in (AgeBand.SENIOR, AgeBand.SUPER_SENIOR)
-        and not taxpayer.has_business_or_profession_income
+        and not taxpayer.has_pgbp_income
         and table.get("s207.senior_no_advance_tax", ay_ref_date).value)
     if net <= table.get("s208.advance_tax_threshold", ay_ref_date).value or senior_exempt:
         return InterestComputation(i234a, Decimal("0"), Decimal("0"), i234a)
@@ -92,7 +94,15 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
             "statute-determined — out of scope")
 
     fy_start = taxpayer.ay - 2
-    schedule = table.get("s234c.schedule", ay_ref_date).value
+    single_instalment = taxpayer.presumptive_scheme in (
+        PresumptiveScheme.SECTION_44AD,
+        PresumptiveScheme.SECTION_44ADA,
+    )
+    schedule_key = (
+        "s234c.schedule_presumptive_44ad_44ada"
+        if single_instalment else "s234c.schedule"
+    )
+    schedule = table.get(schedule_key, ay_ref_date).value
     first_due = date(fy_start, schedule[0][0], schedule[0][1])
     cess = table.get("cess.health_education", ay_ref_date).value
 

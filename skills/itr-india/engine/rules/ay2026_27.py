@@ -100,6 +100,11 @@ _CC_288 = "https://www.charteredclub.com/rounding-off-in-income-tax-section-288a
 _CLEARTAX_234B = "https://cleartax.in/s/interest-imposed-by-income-tax-department-under-section-234b"
 _CLEARTAX_234C = "https://cleartax.in/s/interest-imposed-by-income-tax-department-under-section-234c"
 _MYITR_234C = "https://help.myitreturn.com/hc/en-us/articles/219731327-Interest-payable-for-deferment-of-Advance-tax-installments-Section-234C"
+_ITD_ADVANCE_TAX_PRESUMPTIVE = (
+    "https://www.incometaxindia.gov.in/w/"
+    "who-is-not-required-to-pay-advance-tax-"
+)
+_ITD_FINANCE_ACT_2017_S75 = "https://www.incometaxindia.gov.in/w/section-75-86"
 
 TABLE = RuleTable([
     Rule(key="holding.listed_equity.lt_months", value=12,
@@ -316,6 +321,14 @@ TABLE = RuleTable([
                    "1% pm for 3 months (1 month for March); 12%/36% safe harbors for "
                    "the first two instalments",
          source_primary=_CLEARTAX_234C, source_secondary=_MYITR_234C,
+         effective_from=date(2025, 4, 1), effective_to=None, confidence="settled"),
+    Rule(key="s234c.schedule_presumptive_44ad_44ada",
+         value=((3, 15, "1.00", "", 1),),
+         authority="s.234C(1)(b) — assessee declaring profits u/s 44AD(1) or "
+                   "44ADA(1) pays 100% advance tax by 15 Mar; 1% for one month "
+                   "on any shortfall",
+         source_primary=_ITD_FINANCE_ACT_2017_S75,
+         source_secondary=_ITD_ADVANCE_TAX_PRESUMPTIVE,
          effective_from=date(2025, 4, 1), effective_to=None, confidence="settled"),
     Rule(key="s234c.cg_carveout", value=True,
          authority="proviso to s.234C(1) — no 234C interest on shortfall attributable to "

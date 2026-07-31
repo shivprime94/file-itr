@@ -23,7 +23,8 @@ Pipeline (`compute.compute()` runs all of it):
    s.288A/288B rounding.
 5. **Interest** (`interest.py`) — s.234A/234B/234C with Rule 119A rounding,
    the s.234C capital-gains carve-out, s.208 ₹10k floor, s.207(2) senior
-   exemption.
+   exemption, and the single 15-March instalment for presumptive income under
+   s.44AD/s.44ADA.
 
 `compute.render_report()` prints the full audit trail (income lines, set-off
 steps, carry-forwards, lapsed losses, tax build-up, interest, tax credits, net
@@ -34,6 +35,12 @@ For Section 207(2), set `Taxpayer.has_business_or_profession_income=True` for
 an ITR-3/4 taxpayer with PGBP income. Resident seniors receive the advance-tax
 exemption only when this flag is false. The default is false for compatibility
 with existing non-business callers.
+
+Set `Taxpayer.presumptive_scheme` to `SECTION_44AD`, `SECTION_44ADA`, or
+`SECTION_44AE` for a presumptive filer. Sections 44AD and 44ADA select the
+statutory single-instalment Section 234C schedule (100% by 15 March); Section
+44AE intentionally remains on the ordinary quarterly schedule. Any non-`NONE`
+scheme also counts as PGBP income for the Section 207(2) senior exemption gate.
 
 Structurally out of scope (inputs cannot express them): business/HP/foreign
 income, Chapter VI-A deductions, AMT, clubbing, s.89 relief. `normal_income`
