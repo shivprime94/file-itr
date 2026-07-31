@@ -26,8 +26,14 @@ Pipeline (`compute.compute()` runs all of it):
    exemption.
 
 `compute.render_report()` prints the full audit trail (income lines, set-off
-steps, carry-forwards, lapsed losses, tax build-up, interest) for verification
-against the portal's Part B-TTI.
+steps, carry-forwards, lapsed losses, tax build-up, interest, tax credits, net
+amount payable, and refund due) for verification against the portal's Part
+B-TTI.
+
+For Section 207(2), set `Taxpayer.has_business_or_profession_income=True` for
+an ITR-3/4 taxpayer with PGBP income. Resident seniors receive the advance-tax
+exemption only when this flag is false. The default is false for compatibility
+with existing non-business callers.
 
 Structurally out of scope (inputs cannot express them): business/HP/foreign
 income, Chapter VI-A deductions, AMT, clubbing, s.89 relief. `normal_income`

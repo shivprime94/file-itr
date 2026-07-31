@@ -19,7 +19,9 @@ class Computation:
     tax: TaxComputation
     interest: Optional[InterestComputation]   # None when self_assessment_date not given
     trace: Trace                               # bucketing + set-off lines
-    total_payable: Decimal                     # tax + interest
+    total_credits: Decimal                     # TDS/TCS + advance-tax payments
+    total_payable: Decimal                     # max(tax + interest - credits, 0)
+    refund_due: Decimal                        # max(credits - tax - interest, 0)
 
 
 def compute(taxpayer: Taxpayer, items: list, *, bf_losses: list = (),
@@ -33,6 +35,8 @@ def compute(taxpayer: Taxpayer, items: list, *, bf_losses: list = (),
     without it the result's `interest` is None and `total_payable` is tax only.
     `normal_income` is the already-reconciled slab-rate income (salary after
     standard deduction, interest, dividends...); the engine does not rebuild it.
+    `total_payable` is net of non-negative `tds` and the supplied advance-tax
+    payments; an excess credit is exposed separately as `refund_due`.
     """
     table = table or _TABLE_AY2026_27
     # a date inside the relevant FY, so date-windowed rules resolve
@@ -56,9 +60,14 @@ def compute(taxpayer: Taxpayer, items: list, *, bf_losses: list = (),
     for line in trace_setoff(setoff, table, ay_ref_date).lines:
         trace.add(line)
 
-    total = tax.total_tax + (interest.total if interest else Decimal("0"))
+    interest_total = interest.total if interest else Decimal("0")
+    advance_total = sum((p.amount for p in advance_payments), Decimal("0"))
+    credits = max(tds, Decimal("0")) + advance_total
+    net = tax.total_tax + interest_total - credits
     return Computation(setoff=setoff, tax=tax, interest=interest,
-                       trace=trace, total_payable=total)
+                       trace=trace, total_credits=credits,
+                       total_payable=max(net, Decimal("0")),
+                       refund_due=max(-net, Decimal("0")))
 
 
 def render_report(c: Computation) -> str:
@@ -93,6 +102,9 @@ def render_report(c: Computation) -> str:
         i = c.interest
         out.append("== interest ==")
         out.append(f"234A: {i.i234a}  234B: {i.i234b}  234C: {i.i234c}")
+    out.append(f"tax credits (TDS/TCS + advance tax): -{c.total_credits}")
+    if c.refund_due:
+        out.append(f"== REFUND DUE: {c.refund_due} ==")
     out.append(f"== TOTAL PAYABLE: {c.total_payable} ==")
     contested = c.trace.contested()
     if contested:

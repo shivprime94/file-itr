@@ -66,7 +66,8 @@ things that aren't real.
    and new regimes on the actual numbers and pick the lower — subject to the
    Form 10-IEA constraint for business filers. See "Choosing the regime" below
    and `references/tax-regimes-and-slabs.md` + `references/deductions-old-regime.md`.
-5. **Pick the ITR form.** See "Choosing the ITR form" below.
+5. **Pick the ITR form.** See "Choosing the ITR form" below and
+   `references/form-selection-ay2026-27.md`.
 6. **Compute total income and tax independently** (a script — see "Verify the
    math") *before* trusting the portal, so you catch portal mistakes rather than
    the reverse.
@@ -160,22 +161,27 @@ collect and the limits) is in `references/deductions-old-regime.md`.
 
 Pick the simplest form that legally fits. Ask what applies; don't assume.
 
-- **ITR-1 (Sahaj):** resident, total income ≤ ₹50L, only salary + one house
-  property + other sources + agricultural income ≤ ₹5k. No capital gains (bar a
-  small 112A carve-out in some years), no business income.
+- **ITR-1 (Sahaj), AY 2026-27:** resident individual, total income ≤ ₹50L,
+  salary/pension + up to two house properties + permitted other sources +
+  agricultural income ≤ ₹5k. Aggregate LTCG u/s 112A up to ₹1.25L is permitted;
+  STCG and other capital gains are not. No business income.
 - **ITR-2:** salary + capital gains + multiple house properties + foreign assets,
   but **no** business/profession income.
-- **ITR-4 (Sugam):** resident with presumptive business/profession (44AD/44ADA/
-  44AE), total income ≤ ₹50L, **and no capital gains** and no other disqualifiers.
+- **ITR-4 (Sugam), AY 2026-27:** eligible resident with presumptive business/
+  profession (44AD/44ADA/44AE), total income ≤ ₹50L, permitted salary/pension,
+  up to two house properties and other sources. Aggregate LTCG u/s 112A up to
+  ₹1.25L is permitted; STCG and other capital gains are not. Check all other
+  disqualifiers.
 - **ITR-3:** anyone with business/profession income who can't use ITR-4 — e.g.,
-  presumptive income **plus** capital gains, or actual books, or director/partner/
-  unlisted-share holdings.
+  presumptive income plus STCG/other disqualifying capital gains, 112A LTCG above
+  ₹1.25L, actual books, or director/partner/unlisted-share holdings.
 
-Common cases: a pure salaried person with maybe one house and some FD interest is
-**ITR-1**; add capital gains and they become **ITR-2**; add freelance/creator/
-business income and they become **ITR-3** (or ITR-4 if no capital gains and within
-limits). The very common "salaried + creator income + sold some shares" case is
-**ITR-3**, because capital gains rule out ITR-4.
+Common cases: a pure salaried person with up to two houses and some FD interest
+may use **ITR-1**; add STCG or a disqualifying capital gain and they become
+**ITR-2**; add freelance/creator/business income and they become **ITR-3** (or
+ITR-4 when all simplified-form conditions hold). The common "salaried + creator
+income + listed-share STCG" case is **ITR-3**. Do not generalise that result to
+eligible 112A LTCG up to ₹1.25L, which AY 2026-27 ITR-4 permits.
 
 ## Income heads and where each goes
 
@@ -281,5 +287,7 @@ challan and source documents.
   & property, 111A/112A rates, quarterly breakup for 234C, interest/dividend.
 - `references/virtual-digital-assets.md` — crypto/NFT (VDA) taxation: flat 30%
   u/s 115BBH, no loss set-off, 1% TDS u/s 194S, Schedule VDA reporting.
+- `references/form-selection-ay2026-27.md` — AY-specific ITR-1/2/3/4 eligibility,
+  including the ₹1.25L section 112A and two-house-property boundaries.
 - `references/portal-workflow.md` — step-by-step portal navigation, every known
   quirk with its workaround, and the validation-defect catalogue.

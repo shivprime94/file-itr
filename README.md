@@ -53,6 +53,7 @@ file-itr/
         ├── SKILL.md                # workflow + judgment (read first)
         └── references/
             ├── tax-regimes-and-slabs.md
+            ├── form-selection-ay2026-27.md
             ├── deductions-old-regime.md
             ├── income-reconciliation.md
             ├── creator-44ada.md

@@ -70,6 +70,7 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
     senior_exempt = (
         taxpayer.resident
         and taxpayer.age_band in (AgeBand.SENIOR, AgeBand.SUPER_SENIOR)
+        and not taxpayer.has_business_or_profession_income
         and table.get("s207.senior_no_advance_tax", ay_ref_date).value)
     if net <= table.get("s208.advance_tax_threshold", ay_ref_date).value or senior_exempt:
         return InterestComputation(i234a, Decimal("0"), Decimal("0"), i234a)

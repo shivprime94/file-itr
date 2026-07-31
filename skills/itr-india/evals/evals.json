@@ -35,6 +35,13 @@
       "prompt": "My father is 67, retired. He gets pension ₹6,00,000 and fixed-deposit interest ₹3,50,000. He paid ₹50,000 health insurance premium. Old or new regime, what's his tax, and which ITR form?",
       "expected_output": "Computes tax under BOTH regimes using senior-citizen slabs; finds the NEW regime is cheaper here (~₹0 via the 87A rebate, since total income ~₹8.75L < ₹12L) versus the OLD regime (~₹72,800 after std ded + 80D ₹50k + 80TTB ₹50k on senior slabs); recommends the cheaper one and ITR-1 (pension + interest, no capital gains/business). Demonstrates picking by computation, not by assuming seniors should use the old regime.",
       "files": []
+    },
+    {
+      "id": 5,
+      "name": "ay2026-27-itr4-small-112a-ltcg",
+      "prompt": "For FY 2025-26 I am a resident freelance consultant using 44ADA. Total income is below ₹50 lakh, I have one house property, bank interest, and ₹90,000 long-term gain under section 112A from listed equity funds. I have no short-term gains, foreign assets, unlisted shares, brought-forward losses, or other complications. Must I file ITR-3 because of the capital gain?",
+      "expected_output": "Does not automatically force ITR-3. For AY 2026-27, explains that ITR-4 permits aggregate LTCG u/s 112A up to ₹1.25 lakh, so ₹90,000 can fit ITR-4 when all other eligibility conditions are satisfied. Distinguishes this narrow allowance from STCG, other capital gains, or 112A LTCG above ₹1.25 lakh, which rule out ITR-4; confirms the full disqualifier checklist before recommending the form.",
+      "files": []
     }
   ]
 }

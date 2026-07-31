@@ -30,6 +30,7 @@ def test_sale_before_acquisition_rejected():
 def test_taxpayer_constructs():
     tp = Taxpayer(ay=2027, resident=True, age_band=AgeBand.BELOW_60, regime=Regime.NEW)
     assert tp.ay == 2027
+    assert tp.has_business_or_profession_income is False
 
 
 def test_add_months_clamps_to_month_end():

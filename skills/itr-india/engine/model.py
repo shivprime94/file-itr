@@ -43,6 +43,11 @@ class Taxpayer:
     resident: bool
     age_band: AgeBand
     regime: Regime
+    # Section 207(2) exempts a resident senior from advance tax only when the
+    # senior has no income chargeable under "Profits and gains of business or
+    # profession". Keep the default for callers created before this field was
+    # introduced, while making ITR-3/4 callers state the disqualifier.
+    has_business_or_profession_income: bool = False
 
 
 @dataclass(frozen=True)

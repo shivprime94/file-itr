@@ -74,11 +74,25 @@ def test_no_234b_234c_when_net_liability_at_most_10k():
 
 def test_senior_resident_without_pgbp_owes_no_234b_234c():
     # s.207(2): resident senior with no business income has no advance-tax
-    # obligation at all (the engine models no business income).
+    # obligation at all.
     senior = tp(Regime.NEW, AgeBand.SENIOR)
     t = tax_of(normal=2000000, taxpayer=senior)
     r = run(t, taxpayer=senior, self_assessment_date=date(2026, 7, 15))
     assert r.i234b == Decimal("0") and r.i234c == Decimal("0")
+
+
+def test_senior_with_pgbp_is_not_exempt_from_advance_tax():
+    senior_business = Taxpayer(
+        ay=2027,
+        resident=True,
+        age_band=AgeBand.SENIOR,
+        regime=Regime.NEW,
+        has_business_or_profession_income=True,
+    )
+    t = tax_of(normal=2000000, taxpayer=senior_business)
+    r = run(t, taxpayer=senior_business, self_assessment_date=date(2026, 7, 15))
+    assert r.i234b == Decimal("8320")
+    assert r.i234c == Decimal("10504")
 
 
 # ---------------- 234C ----------------

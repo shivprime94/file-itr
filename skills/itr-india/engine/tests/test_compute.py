@@ -94,3 +94,27 @@ def test_interest_totals_flow_into_total_payable():
     assert c.tax.total_tax == Decimal("208000")
     assert c.interest.total > 0                      # nothing prepaid: 234B + 234C
     assert c.total_payable == c.tax.total_tax + c.interest.total
+
+
+def test_tds_and_advance_tax_reduce_amount_payable():
+    c = compute(
+        TP,
+        [],
+        normal_income=Decimal("2000000"),
+        tds=Decimal("100000"),
+        advance_payments=[AdvanceTaxPayment(date(2026, 3, 10), Decimal("100000"))],
+        self_assessment_date=date(2026, 7, 15),
+    )
+    assert c.total_credits == Decimal("200000")
+    assert c.total_payable == c.tax.total_tax + c.interest.total - c.total_credits
+    assert c.refund_due == Decimal("0")
+
+
+def test_excess_tds_is_reported_as_refund_not_payable():
+    c = compute(TP, [], normal_income=Decimal("500000"), tds=Decimal("25000"))
+    assert c.tax.total_tax == Decimal("0")
+    assert c.total_payable == Decimal("0")
+    assert c.refund_due == Decimal("25000")
+    report = render_report(c)
+    assert "REFUND DUE: 25000" in report
+    assert "TOTAL PAYABLE: 0" in report
