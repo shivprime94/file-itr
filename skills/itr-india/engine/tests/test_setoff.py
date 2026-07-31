@@ -22,16 +22,16 @@ def st_111a(gain):  # listed equity, STT, held < 12m
     return cg(AssetClass.LISTED_EQUITY_STT, date(2024, 1, 1), date(2024, 11, 1), gain, stt=True)
 
 
-def st_slab(gain):  # gold ETF held < 12m
-    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2025, 6, 1), gain)
+def st_slab(gain):  # gold ETF held < 12m (post-1-Apr-2025 acq → 12m threshold)
+    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2025, 6, 1), gain)
 
 
 def lt_112a(gain):  # equity MF, STT, held > 12m
     return cg(AssetClass.EQUITY_MF_STT, date(2023, 1, 1), date(2024, 6, 1), gain, stt=True)
 
 
-def lt_112(gain):  # gold ETF held > 12m
-    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2026, 5, 1), gain)
+def lt_112(gain):  # gold ETF held > 12m (post-1-Apr-2025 acq)
+    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2026, 5, 1), gain)
 
 
 def bf(kind, ay, amount, timely=True):
