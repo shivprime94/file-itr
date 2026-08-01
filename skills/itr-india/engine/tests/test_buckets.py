@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from engine.model import AssetClass, CapitalGainItem, VdaItem
 from engine.rules.ay2026_27 import TABLE
-from engine.buckets import Bucket, classify, bucket_income
+from engine.buckets import Bucket, classify, bucket_income, effective_gain
 
 REF = date(2025, 6, 1)
 
@@ -125,3 +125,59 @@ def test_bucket_income_sums_and_partitions():
     assert out[Bucket.VDA_115BBH] == Decimal("40000")
     # every rupee accounted for exactly once
     assert sum(out.values()) == Decimal("120000")
+
+
+def _cg_item(asset, acq, sale, proceeds, cost, fmv=None):
+    return CapitalGainItem(asset, acq, sale, Decimal(proceeds), Decimal(cost),
+                           stt_paid=True, fmv_31jan2018=fmv)
+
+
+def test_effective_gain_112a_pre2018_reduces_to_post_fmv_appreciation():
+    # cost 1L, FMV-on-31Jan2018 4L, sale 10L -> COA=4L, gain = 10L-4L = 6L
+    # (only appreciation after 31-Jan-2018 is taxed; raw gain would be 9L)
+    item = _cg_item(AssetClass.EQUITY_MF_STT, date(2016, 1, 1), date(2025, 8, 1),
+                    1000000, 100000, fmv=400000)
+    assert effective_gain(item, Bucket.LTCG_112A, TABLE, REF) == Decimal("600000")
+
+
+def test_effective_gain_112a_pre2018_sale_within_fmv_band_is_zero():
+    # cost 1L, FMV 5L, sale 3L (between cost and FMV) -> COA=min(FMV,sale)=3L,
+    # gain = 3L-3L = 0: the entire gain is pre-2018 appreciation.
+    item = _cg_item(AssetClass.EQUITY_MF_STT, date(2016, 1, 1), date(2025, 8, 1),
+                    300000, 100000, fmv=500000)
+    assert effective_gain(item, Bucket.LTCG_112A, TABLE, REF) == Decimal("0")
+
+
+def test_effective_gain_112a_pre2018_crash_below_cost_is_genuine_loss():
+    # cost 5L, FMV 8L, sale 3L (price crashed below actual cost) -> COA=cost
+    # (never FMV-inflated), loss = 3L-5L = -2L, not manufactured by FMV.
+    item = _cg_item(AssetClass.EQUITY_MF_STT, date(2016, 1, 1), date(2025, 8, 1),
+                    300000, 500000, fmv=800000)
+    assert effective_gain(item, Bucket.LTCG_112A, TABLE, REF) == Decimal("-200000")
+
+
+def test_effective_gain_112a_pre2018_missing_fmv_raises():
+    from engine.scope import OutOfScopeError
+    item = _cg_item(AssetClass.EQUITY_MF_STT, date(2016, 1, 1), date(2025, 8, 1),
+                    1000000, 100000)   # fmv=None
+    with pytest.raises(OutOfScopeError, match="fmv_31jan2018"):
+        effective_gain(item, Bucket.LTCG_112A, TABLE, REF)
+
+
+def test_effective_gain_post_cutoff_acquisition_unchanged():
+    # acquired 2019 (after the 1-Feb-2018 cutoff) -> grandfathering never
+    # applies, even though fmv is supplied.
+    item = _cg_item(AssetClass.EQUITY_MF_STT, date(2019, 1, 1), date(2025, 8, 1),
+                    500000, 200000, fmv=999999)
+    assert effective_gain(item, Bucket.LTCG_112A, TABLE, REF) == item.gain
+    assert effective_gain(item, Bucket.LTCG_112A, TABLE, REF) == Decimal("300000")
+
+
+def test_effective_gain_non_112a_bucket_unchanged_even_if_pre2018():
+    # LAND_BUILDING -> LTCG_112, not LTCG_112A: s.55(2)(ac) grandfathering is
+    # 112A-specific and must never apply here, regardless of acquisition date.
+    item = CapitalGainItem(AssetClass.LAND_BUILDING, date(2016, 1, 1), date(2025, 8, 1),
+                           Decimal("1000000"), Decimal("100000"),
+                           fmv_31jan2018=Decimal("400000"))
+    assert effective_gain(item, Bucket.LTCG_112, TABLE, REF) == item.gain
+    assert effective_gain(item, Bucket.LTCG_112, TABLE, REF) == Decimal("900000")

@@ -96,6 +96,15 @@ _CLEARTAX_112 = "https://cleartax.in/s/section-112-calculate-income-tax-on-long-
 # income against the basic exemption limit"; non-residents excluded.
 _QUICKO_112 = "https://learn.quicko.com/section-112-of-income-tax-act-capital-gain-long-term-capital-assets"
 _UPSTOX_BEL = "https://upstox.com/news/personal-finance/tax/can-i-adjust-stcg-ltcg-against-the-basic-exemption-limit-under-both-old-and-new-tax-regimes/article-165394/"
+# "Section 55 in The Income Tax Act, 1961" — bare Act text for clause (2)(ac).
+_IK_55 = "https://indiankanoon.org/doc/1704110/"
+# msassociates.pro — states the s.55(2)(ac) formula plainly: COA of an equity
+# share/equity-MF-unit acquired before 1-Feb-2018 (for s.112A purposes) is the
+# higher of actual cost or the lower of FMV as on 31-Jan-2018 and full value
+# of consideration. Corroborates the loss-disallowed proviso (vrdnation.com,
+# search-verified 2026-08-01): the formula can only shield pre-2018 gains, it
+# cannot manufacture a loss beyond the actual-cost loss.
+_MSASSOCIATES_55 = "https://www.msassociates.pro/articles/section-55-2-ac-cost-of-acquisition/"
 # cleartax surcharge page — 10/15/25/37% at 50L/1cr/2cr/5cr, new-regime cap
 # 25%, "Surcharge has been capped at 15% on dividend income and Capital gains
 # covered under section 111A, 112 and 112A", marginal-relief principle.
@@ -270,6 +279,13 @@ TABLE = RuleTable([
          authority="s.112A — first ₹1.25L of 112A LTCG exempt (aggregate, per AY)",
          source_primary=_BAJAJAMC_CG, source_secondary=_CLEARTAX_112,
          effective_from=date(2024, 7, 23), effective_to=None, confidence="settled"),
+    Rule(key="s55.grandfather_112a_coa", value=True,
+         authority="s.55(2)(ac) — COA of an equity share/equity-MF unit acquired "
+                   "before 1-Feb-2018, for s.112A purposes, is the higher of actual "
+                   "cost or the lower of FMV as on 31-Jan-2018 and the full value of "
+                   "consideration on transfer",
+         source_primary=_IK_55, source_secondary=_MSASSOCIATES_55,
+         effective_from=date(2018, 4, 1), effective_to=None, confidence="settled"),
     Rule(key="rate.ltcg_112", value=Decimal("0.125"),
          authority="s.112 — 12.5% without indexation for transfers on/after 23-Jul-2024",
          source_primary=_CLEARTAX_112, source_secondary=_QUICKO_112,

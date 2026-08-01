@@ -16,6 +16,11 @@ _LISTED_NONEQUITY_12M_FROM = date(2025, 4, 1)
 _LISTED_NONEQUITY_TRANSITIONAL_FROM = date(2024, 7, 23)
 _LISTED_NONEQUITY_TRANSITIONAL_MONTHS = 24
 
+# s.55(2)(ac): equity share/equity-MF unit acquired before 1-Feb-2018 gets a
+# grandfathered cost of acquisition for s.112A purposes (only post-31-Jan-2018
+# appreciation is taxed).
+_S55_GRANDFATHER_CUTOFF = date(2018, 2, 1)
+
 
 class Bucket(Enum):
     NORMAL = "normal"
@@ -68,6 +73,21 @@ def classify(item, table: RuleTable, ay_ref_date: date) -> tuple[Bucket, str]:
     raise ValueError(
         f"internal invariant violated: unclassifiable item {item!r} reached classify; "
         "check_scope should have refused it")
+
+
+def effective_gain(item, bucket: Bucket, table: RuleTable, ay_ref_date: date) -> Decimal:
+    """Item's gain for tax purposes: raw, except LTCG_112A items acquired
+    before 1-Feb-2018 get the s.55(2)(ac) grandfathered cost of acquisition."""
+    if bucket is Bucket.LTCG_112A and item.acquisition_date < _S55_GRANDFATHER_CUTOFF:
+        table.get("s55.grandfather_112a_coa", ay_ref_date)
+        if item.fmv_31jan2018 is None:
+            raise OutOfScopeError(
+                "LTCG_112A item acquired before 1-Feb-2018 needs fmv_31jan2018 "
+                "for s.55(2)(ac) grandfathering — not supplied")
+        coa = max(item.cost, min(item.fmv_31jan2018, item.proceeds))
+        return item.proceeds - coa
+    return item.gain
+
 
 def bucket_income(items: list, table: RuleTable, ay_ref_date: date) -> dict[Bucket, Decimal]:
     out: dict[Bucket, Decimal] = defaultdict(lambda: Decimal("0"))
