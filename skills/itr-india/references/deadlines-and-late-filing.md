@@ -8,23 +8,41 @@
 
 ## The s.139(1) due dates
 
-| Who | Due date, AY 2026-27 |
-|---|---|
-| Individual **not** liable to audit (ITR-1 / ITR-2, salaried, etc.) | **31 July 2026** |
-| Taxpayer whose accounts require a **tax audit** (and partners of such firms) | **31 October 2026** |
+The **Finance Act 2026 substituted Explanation 2 to s.139(1)** to add a new
+**31 August** tier. The date turns on the **type of income, not the ITR form**:
 
-- **31 July** is the long-standing statutory default for an individual not
-  subject to audit — treat it as the operative date unless you have verified
-  otherwise.
-- **Unverified — flag, do not assume:** several secondary sources report a
-  Finance Act 2026 change giving **non-audit ITR-3 / ITR-4** filers until
-  **31 August 2026** (a tiered structure, with ITR-1/ITR-2 still at 31 July).
-  This was **not corroborated on the Income Tax Department's own site** when this
-  file was written. Per this repo's citation discipline, **do not rely on the
-  31-August date until you confirm it against the actual CBDT notification or
-  the gazetted Finance Act 2026 text** — assume 31 July if unsure. If the user
-  is filing near the deadline, tell them plainly that this specific date needs
-  checking.
+| Assessee (AY 2026-27) | Due date |
+|---|---|
+| **No** business/profession income — salaried, pensioner, investor (ITR-1/ITR-2, and an ITR-3 filed for a non-business reason) | **31 July 2026** |
+| **Non-audit** business/profession income, and specified **partners** of such firms | **31 August 2026** |
+| Accounts **require a tax audit** (s.44AB), and their partners | **31 October 2026** |
+| Transfer-pricing (s.92E) cases | 30 November 2026 |
+
+- **Verified (moved from "flag before relying").** This is a **permanent
+  statutory change, not a departmental extension** — a substituted Explanation 2,
+  effective for **AY 2026-27** (which is still governed by the Income-tax Act
+  1961; the new Income-tax Act 2025 applies from FY 2026-27). Confirmed on the
+  **Income Tax Department's own e-filing FAQ**: "For AY 2026-27 … the due date is
+  31st July, 2026 or 31st August for non-audit cases" ([ITD, Income Tax Returns
+  FAQ](https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/%20income%20tax%20returns-faq)).
+  The amended four-tier Explanation 2 is reproduced at [TaxGuru, AY 2026-27 ITR
+  due dates under Finance Act 2026](https://taxguru.in/income-tax/ay-2026-27-itr-due-dates-finance-act-2026.html).
+  The ultimate primary — the gazetted Finance Act 2026 / the Memorandum to the
+  Finance Bill on [indiabudget.gov.in](https://www.indiabudget.gov.in/doc/memo.pdf) —
+  is the enacting text but returns HTTP 403 to automated fetch; the ITD FAQ above
+  is the fetched authority.
+- **Watch the trigger — it is the income, not the form.** The 31 August tier is
+  for someone who *has* non-audit business/profession income — **not** anyone who
+  merely files ITR-3. A **director** or an **unlisted-share holder** with only
+  salary/capital gains files ITR-3 but has **no** business income → their date is
+  **31 July**. Conversely a **44ADA creator** or **44AD trader** (ITR-4/ITR-3)
+  gets **31 August**. When in doubt, ask "does this person have business or
+  profession income?" — that, not the form, sets the date.
+- **s.234A follows the due date.** For a non-audit business filer the return-
+  filing interest clock (below) now starts **1 September**, not 1 August — pass
+  the correct `due_date` when computing s.234A (the engine takes it as input, it
+  does not assume 31 July). CBDT can still extend any of these by circular near
+  the date — re-confirm at filing time.
 - A **resident and ordinarily resident with foreign assets/income** (or signing
   authority in a foreign account) must file a return **regardless of income
   level** — the seventh proviso to s.139(1) makes filing mandatory even below
