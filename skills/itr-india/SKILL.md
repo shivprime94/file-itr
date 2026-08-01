@@ -1,9 +1,10 @@
 ---
 name: itr-india
 description: >-
-  Assist any Indian individual with preparing and e-filing an Income Tax Return
-  (ITR-1/2/3/4) on the e-filing portal (eportal.incometax.gov.in), under EITHER
-  the old or new tax regime. Use WHENEVER the user mentions filing taxes in India,
+  Assist a resident Indian individual with preparing and e-filing an Income Tax
+  Return (ITR-1/2/3/4) on the e-filing portal (eportal.incometax.gov.in), under
+  EITHER the old or new tax regime (non-resident / RNOR returns are out of
+  scope). Use WHENEVER the user mentions filing taxes in India,
   ITR, income tax return, 26AS, AIS, Form 16, old vs new regime, 115BAC, Form
   10-IEA, 80C/80D/HRA/home-loan/NPS/80G deductions, 44ADA/44AD presumptive,
   self-assessment/advance tax/234B/234C, TDS reconciliation, capital gains on
@@ -19,9 +20,11 @@ description: >-
 
 ## What this skill does and its boundaries
 
-This skill turns Claude into a careful, methodical preparer for any Indian
-individual's income tax return — salaried, freelancer/creator, small business,
-investor, pensioner — under **either the old or the new regime**. The goal is a
+This skill turns Claude into a careful, methodical preparer for a **resident**
+Indian individual's income tax return — salaried, freelancer/creator, small
+business, investor, pensioner — under **either the old or the new regime**
+(non-resident / RNOR returns, with their DTAA / Form 67 / Schedule FSI-TR
+machinery, are out of scope — see step 1). The goal is a
 return where **every rupee of income is reconciled to a source document**, the
 **cheaper regime is chosen by actual computation (not guesswork)**, the tax math
 is independently verified, and the user is walked cleanly through the portal up
@@ -55,6 +58,13 @@ things that aren't real.
 1. **Establish the year and the person.** Confirm the Assessment Year (AY) and
    Financial Year (FY), residential status, age (senior-citizen slabs differ),
    and a rough picture of income sources. AY = FY + 1 (FY 2025-26 → AY 2026-27).
+   **Check the due date now** (`references/deadlines-and-late-filing.md`): if it
+   has passed, or is about to, the return is belated — flag the s.234F fee,
+   s.234A interest, and especially that **any loss carry-forward is lost** on a
+   late return. This is resident-individual India tax only — a **non-resident**
+   return (NR/RNOR, DTAA relief, Form 67 foreign tax credit, Schedule FSI/TR) is
+   **out of scope** here; the residency call in this step is a gate, not a
+   formality.
 2. **Gather every income document and every deduction proof.** Form 16(s), Form
    26AS, AIS/TIS, bank statements, broker/capital-gains statements, platform
    payout files — and, if old regime is in play, 80C/80D/home-loan/HRA/donation
@@ -219,6 +229,11 @@ def tax_new(x):
 
 def tax_old(x, age="below_60"):
     # age: "below_60" | "senior" (60-79, nil to 3L) | "super_senior" (80+, nil to 5L)
+    # RESIDENT-ONLY: the ₹3L/₹5L senior/super-senior exemptions require the
+    # taxpayer to be *resident in India* (Finance Act First Schedule Part III
+    # Para A: "being a resident in India"). A NON-RESIDENT of any age gets the
+    # ₹2,50,000 exemption — call this with age="below_60" for a non-resident
+    # senior, and do NOT apply the 87A rebate (resident-only, see below).
     base = {"below_60": 250000, "senior": 300000, "super_senior": 500000}[age]
     if age == "super_senior":
         slabs = [(base, 0), (1000000, .20)]
@@ -237,9 +252,11 @@ def tax_old(x, age="below_60"):
 # Compute taxable income SEPARATELY per regime: old allows std ded 50k + Ch-VIA
 # deductions; new allows std ded 75k and almost no deductions.
 # Add special-rate items (e.g. STCG u/s 111A @ its rate) on TOP of slab tax,
-# then add 4% health & education cess. Apply 87A rebate where eligible — new
-# regime (Finance Act 2025): compare SLAB-ONLY income (excl. 111A/112/112A) to
-# 12L, not total income; special-rate tax is never rebated. Whether VDA
+# then add 4% health & education cess. Apply 87A rebate where eligible — the
+# rebate is RESIDENT-ONLY (a non-resident gets no 87A at all, regardless of
+# income) — new regime (Finance Act 2025): compare SLAB-ONLY income (excl.
+# 111A/112/112A) to 12L, not total income; special-rate tax is never rebated.
+# Whether VDA
 # (s.115BBH) counts toward the 12L test is not settled here — if including
 # VDA would change the rebate, do not auto-rebate; verify against the portal
 # or a primary source. See tax-regimes-and-slabs.md.
@@ -305,5 +322,8 @@ challan and source documents.
   u/s 115BBH, no loss set-off, 1% TDS u/s 194S, Schedule VDA reporting.
 - `references/form-selection-ay2026-27.md` — AY-specific ITR-1/2/3/4 eligibility,
   including the ₹1.25L section 112A and two-house-property boundaries.
+- `references/deadlines-and-late-filing.md` — s.139(1) due dates, s.234F late
+  fee, belated/revised returns, s.234A interest, and the loss-carry-forward
+  timely-return gate.
 - `references/portal-workflow.md` — step-by-step portal navigation, every known
   quirk with its workaround, and the validation-defect catalogue.

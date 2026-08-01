@@ -166,8 +166,11 @@ def compute_tax(buckets: dict, taxpayer: Taxpayer, table: RuleTable,
     # --- surcharge, with 15% CG/dividend cap and marginal relief ---
     if dividend_income > slab_base:
         raise OutOfScopeError(
-            "dividend_income exceeds slab_base — dividend_income must be a "
-            "subset of the income already folded into normal_income")
+            "dividend_income exceeds slab_base — at this layer dividend must "
+            "already be part of the slab-rate income (compute.compute() folds "
+            "it into normal_income before calling compute_tax); a direct "
+            "compute_tax caller must include dividend in the buckets' slab "
+            "income too, then pass the same figure here for the 15% cap")
     table.get("engine.dividend_surcharge_attribution", ay_ref_date)
     dividend_tax = slab_tax - _slab_tax(slab_base - dividend_income, slabs)
 

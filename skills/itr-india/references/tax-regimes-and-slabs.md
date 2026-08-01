@@ -28,7 +28,9 @@ but almost no other deductions/exemptions.
 | above ₹24,00,000 | 30% |
 
 - **Standard deduction:** ₹75,000 against salary (once per person).
-- **87A rebate (as amended by Finance Act 2025):** income chargeable at special
+- **87A rebate (as amended by Finance Act 2025) — resident-only:** available
+  only to a resident individual (a non-resident gets no 87A; see the old-regime
+  87A note below for the source). Income chargeable at special
   rates under **111A / 112 / 112A** is excluded **both** from the ₹12,00,000
   eligibility test **and** from what the rebate can offset. So a filer with
   ₹11L slab income and ₹3L of 112A LTCG is still fully rebated on the ₹11L
@@ -61,8 +63,28 @@ slabs and ₹50,000 standard deduction.
 **Senior citizen (60–79):** first slab (nil) extends to **₹3,00,000**.
 **Super senior (80+):** first slab (nil) extends to **₹5,00,000**.
 
+> **Resident-only.** The ₹3,00,000 / ₹5,00,000 higher exemptions are available
+> **only to a taxpayer resident in India**. Statutory authority is the Finance
+> Act First Schedule, Part III, Paragraph A (the senior / super-senior
+> paragraphs are worded for an individual *resident in India*). Verified via the
+> Income Tax Department's [Non-Resident Individual, AY 2026-27](https://www.incometax.gov.in/iec/foportal/help/individual/return-applicable-0)
+> page, which was fetched and states the NR rate is "same … **irrespective of
+> date of birth of the taxpayer**" — i.e. a **non-resident** senior/super-senior
+> gets the ordinary **₹2,50,000** exemption (old regime), whatever their age.
+> (Note: the ITD's senior-citizen help page labels its slab chart "Individual
+> (resident or non-resident)", which reads as a conflict; the NR page above and
+> the statutory wording resolve it — the higher slab is resident-only.) This
+> engine refuses non-resident computations outright (`engine/scope.py`); when
+> computing by hand, don't hand an NR the senior slab.
+
 - **Standard deduction:** ₹50,000 against salary.
 - **87A rebate:** tax nil up to total income **₹5,00,000** in the old regime.
+  **Resident-only** — a non-resident cannot claim the 87A rebate under either
+  regime, at any income. Source: Income Tax Department,
+  [Can a non-resident claim rebate under section 87A?](https://www.incometaxindia.gov.in/w/can-a-non-resident-claim-rebate-under-section-87a-)
+  ("rebate under section 87A is available only to an individual who is resident
+  in India, hence, non-residents cannot claim rebate under section 87A"). The
+  same resident-only limit applies to the new-regime ₹60,000 rebate above.
 
 ## Common to both
 

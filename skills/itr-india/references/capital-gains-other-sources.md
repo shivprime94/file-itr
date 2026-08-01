@@ -39,8 +39,14 @@ Traps to check explicitly:
 
 - **Arbitrage funds** (Nippon/PPFAS/WhiteOak Arbitrage etc.) are equity-oriented
   despite behaving like debt — 111A/112A, not slab.
-- **Balanced-advantage / dynamic asset allocation and liquid funds** are usually
-  NOT equity-oriented — slab STCG, and the CA treating them at slab is correct.
+- **Balanced-advantage / dynamic asset allocation funds** usually ARE
+  equity-oriented — most maintain **gross equity ≥ 65%** (often via arbitrage/
+  hedged positions) specifically to qualify, so they get 111A/112A, not slab.
+  Don't assume "balanced/hybrid ⇒ non-equity"; **check the AIS code / the fund's
+  equity-oriented declaration** for the year. **Liquid / money-market funds**,
+  by contrast, are NOT equity-oriented (slab), and a CA treating those at slab
+  is correct. A fund that drops below 65% equity loses equity-oriented status
+  and its gains go to slab regardless of holding period.
 - **Switch-outs count as redemptions** and carry STT for equity funds; they get
   the same 111A/112A treatment as normal redemptions.
 - When reviewing someone else's computation, reproduce their total first under
@@ -51,10 +57,34 @@ Traps to check explicitly:
 
 Watch the asset type before assuming 111A/112A:
 
-- **Gold / silver ETFs** (not equity-oriented): held ≤ 12 months → **STCG at
+- **Gold / silver ETFs** (listed, not equity-oriented): short-term → **STCG at
   slab (applicable) rate**, reported under CG section A "sale of assets other
-  than A1–A4", not 111A. Longer holdings follow the current-year LTCG rule for
-  such assets — confirm the holding-period threshold and rate for the year.
+  than A1–A4", not 111A. Long-term → **12.5% without indexation u/s 112**.
+  **Do not use a flat "12 months" rule** — the threshold is transitional.
+
+  For **AY 2026-27 the practical answer is decided by arithmetic** (no source
+  needed): a transfer this year happens by 31 Mar 2026, so
+  - a unit acquired **on/after 1 Apr 2025** cannot have been held 12 months, and
+  - a unit acquired in the **23 Jul 2024 – 31 Mar 2025** transitional window
+    cannot have been held its (longer) threshold either.
+
+  So **every gold ETF acquired on/after 23 Jul 2024 and sold in FY 2025-26 is
+  short-term → slab**, whatever the exact threshold. A gold-ETF **LTCG** in
+  AY 2026-27 can therefore only come from a **pre-23-Jul-2024** acquisition —
+  and those follow the older (36-month) rule and are **out of the engine's
+  Phase-1 scope** (`engine/scope.py` / `engine/buckets.py` refuse them), so
+  compute them by hand against the law in force on the transfer date.
+  - *For later years / completeness:* Finance (No.2) Act 2024 re-classified
+    listed non-equity units so the long-term threshold becomes **> 12 months**
+    for units **acquired on/after 1 Apr 2025**, with a **> 24-month**
+    transitional threshold for the **23 Jul 2024 – 31 Mar 2025** window. This
+    mirrors `engine/buckets.py` (`_listed_nonequity_lt_months`) and the
+    `holding.listed_nonequity.lt_months` rule — which the engine itself marks
+    **`confidence="contested"`** because its bare-Act primary does not
+    corroborate the acquisition-date condition. Treat the two-range split as
+    **search-verified, not primary-confirmed** (no single fetched source stated
+    both thresholds, 2026-08-01); **verify before relying** for a year where it
+    actually changes the answer.
 - **Liquid / debt ETFs and debt mutual funds** are typically **"specified mutual
   funds" u/s 50AA** → gains taxed at **slab rate regardless of holding period**.
 
@@ -124,6 +154,52 @@ STCG/LTCG → Schedule SI (special income) where the special-rate tax is compute
 → Part B-TI item for capital gains → Part B-TTI "tax at special rates". Verify
 the special-rate tax equals gain × the special rate.
 
+## Capital gains on immovable property (land / building)
+
+SKILL.md advertises "capital gains on … property," so know these — they route
+differently from listed equity and are **not** in the tested engine's scope for
+the indexation-option case (`engine/scope.py` refuses pre-23-Jul-2024
+land/building LTCG). Re-confirm every figure for the year; work these by hand.
+
+- **Holding period:** long-term at **> 24 months** (s.2(42A)); otherwise
+  short-term at the **slab rate** (no 111A for property).
+- **Rate on LTCG (s.112):** **12.5% without indexation** for transfers on/after
+  23 Jul 2024. For land/building **acquired before 23 Jul 2024**, a **resident**
+  may instead opt **20% with indexation** and pay the lower of the two (proviso
+  to s.112) — you need the CII table to evaluate it. Source: [ClearTax, s.112](https://cleartax.in/s/section-112-calculate-income-tax-on-long-term-capital-gains).
+- **Section 50C — stamp-duty-value floor:** the full value of consideration is
+  **deemed to be the stamp-duty value** if that value **exceeds 110%** of the
+  actual consideration (a 10% tolerance band, AY 2021-22 onward); within 10%,
+  the actual consideration stands. So check the sale deed's SDV against the
+  agreed price before computing the gain. Source: [ClearTax, s.50C](https://cleartax.in/s/taxability-sale-land-building-section-50c).
+- **Cost / FMV-as-on-1-Apr-2001:** for property acquired **before 1 Apr 2001**,
+  the taxpayer may substitute the **FMV as on 1 Apr 2001** for actual cost
+  (s.55(2)(b)) — get a registered valuer's report; the SDV as on 1 Apr 2001 caps
+  it.
+- **Reinvestment exemptions (claim if the facts fit):**
+  - **s.54** — LTCG on a **residential house** reinvested in another residential
+    house (buy 1 yr before / 2 yr after, or construct within 3 yr).
+  - **s.54F** — LTCG on **any other** long-term asset, where the **net sale
+    consideration** is reinvested in one residential house (assessee must not
+    own more than one other house).
+  - **s.54EC** — LTCG on **land/building** invested in **REC / PFC / IRFC / NHAI
+    bonds within 6 months**, capped at **₹50 lakh** (across the two FYs of the
+    same transfer), 5-year lock-in.
+  - s.54 and s.54F reinvestment exemption is **capped at ₹10 crore** (FY 2023-24
+    onward). Sources: [ClearTax, s.54EC](https://cleartax.in/s/section-54ec-bonds);
+    [AllIndiaITR, s.54/54F/54EC](https://www.allindiaitr.com/capital-gains-exemption-section-54-54f-54ec).
+- **Section 194-IA TDS (reconciliation):** on a sale where consideration **or**
+  SDV is **≥ ₹50 lakh**, the **buyer** deducts **1% TDS** (higher of the two) and
+  files Form 26QB. For the **seller's** return, that 1% shows up in 26AS/AIS and
+  is claimed as a TDS credit like any other; for a taxpayer who **bought**
+  property, flag the Form 26QB obligation. From 1 Oct 2024 the ₹50 lakh test is
+  on the **aggregate** across all buyers/sellers. Source: [Income Tax
+  Department, TDS on purchase of immovable property](https://www.incometaxindia.gov.in/w/tds-from-sum-paid-to-buy-an-immovable-property).
+
+Property gains that qualify for the 20%-with-indexation option, or that need CII
+computation, are **beyond the quick self-file / the tested engine** — escalate
+rather than guess the indexed cost.
+
 ## Income from other sources (Schedule OS)
 
 - **Interest** (savings bank, FD, RD, P2P, income-tax refund interest): all
@@ -132,8 +208,14 @@ the special-rate tax equals gain × the special rate.
   ones missing from AIS).
 - **Dividends:** taxable at slab rate. If dividend exceeds ₹10k from a payer, TDS
   u/s 194 may appear in 26AS — reconcile. Dividends need a quarter-wise breakup in Schedule OS (upto 15/6, 16/6–15/9, 16/9–15/12, 16/12–15/3, 16/3–31/3) — the portal uses it for 234C. Build it from the broker's dividend statement (date-wise ledger), not the single AIS total. Strictly it's date of receipt/credit; ex-date is a fine proxy and the difference is immaterial when the return is in a refund position.
-- Other items (gifts > ₹50k u/s 56(2)(x), family pension, winnings u/s
-  115BB/115BBJ at special rates) only if applicable.
+- **Family pension** (pension to a deceased employee's family) is taxable under
+  "other sources", but a **standard deduction u/s 57(iia)** applies: the **lower
+  of one-third of the family pension or ₹15,000** (old regime) / **₹25,000**
+  (new regime, raised by Finance (No.2) Act 2024, AY 2025-26 onward). This is
+  distinct from the salary standard deduction and easy to miss. Source:
+  [ClearTax, s.57](https://cleartax.in/s/section-57-of-the-income-tax).
+- Other items (gifts > ₹50k u/s 56(2)(x), winnings u/s 115BB/115BBJ at special
+  rates) only if applicable.
 
 Net "Income from Other Sources" flows into Part B-TI and is taxed at normal slab
 rates (except the special-rate items, which route through Schedule SI).
