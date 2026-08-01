@@ -120,6 +120,24 @@ _ITD_ADVANCE_TAX_PRESUMPTIVE = (
     "who-is-not-required-to-pay-advance-tax-"
 )
 _ITD_FINANCE_ACT_2017_S75 = "https://www.incometaxindia.gov.in/w/section-75-86"
+# CBDT Circular No. 2/2015 (10-Feb-2015), issued to give effect to the Supreme
+# Court's ruling in CIT v. Pranoy Roy [2009] 309 ITR 231, holds that s.234A
+# interest is compensatory and is not chargeable on self-assessment tax paid
+# before the due date of filing the return, even where the return itself is
+# filed late. Primary is the CBDT circular hosted on indiacode.nic.in — the
+# PDF is genuine but did not extract cleanly via WebFetch's text conversion
+# (2026-08-01); abcaus.in (fetched cleanly) and multiple independent
+# secondaries (taxguru, bcajonline, taxscan reporting a following ITAT ruling)
+# converge on the same circular number and holding.
+_CBDT_CIRCULAR_2_2015 = (
+    "https://upload.indiacode.nic.in/showfile?actid=AC_CEN_2_2_00039_196143_"
+    "1524045010860&type=circular&filename=ita-circulars-section-234a-"
+    "circular-no-2-2015-dated-10-2-2015.pdf"
+)
+_ABCAUS_PRANOY_ROY = (
+    "https://abcaus.in/income-tax/interest-us-234a-cant-be-levied-self-"
+    "assessment-tax-paid-before-due-date-filing-itr.html"
+)
 
 TABLE = RuleTable([
     Rule(key="holding.listed_equity.lt_months", value=12,
@@ -337,6 +355,13 @@ TABLE = RuleTable([
          authority="s.234B — applies when advance tax paid is below 90% of assessed tax",
          source_primary=_CLEARTAX_234B, source_secondary=_CLEARTAX_234C,
          effective_from=date(2025, 4, 1), effective_to=None, confidence="settled"),
+    Rule(key="s234a.sat_before_due_date_reduces_base", value=True,
+         authority="CIT v. Pranoy Roy [2009] 309 ITR 231 (SC); CBDT Circular No. 2/2015 "
+                   "(10-Feb-2015) — s.234A interest is compensatory and not chargeable on "
+                   "self-assessment/other tax paid on or before the return due date, even "
+                   "if the return itself is filed late",
+         source_primary=_CBDT_CIRCULAR_2_2015, source_secondary=_ABCAUS_PRANOY_ROY,
+         effective_from=date(2009, 1, 1), effective_to=None, confidence="settled"),
     # (month, day, cumulative %, safe-harbor % or "", months of interest);
     # month 3 falls in the FY's closing calendar year, the rest in its opening.
     Rule(key="s234c.schedule",

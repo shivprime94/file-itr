@@ -109,8 +109,10 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
         if due_date is None:
             raise OutOfScopeError("s.234A needs both filing_date and due_date")
         if filing_date > due_date:
-            # Self-assessment / other post-FY tax paid on or before the return
-            # due date reduces the unpaid-tax base (s.234A r/w s.140A).
+            # CIT v. Pranoy Roy (SC) / CBDT Circular 2/2015 — s.234A is not
+            # chargeable on tax already paid by the due date, so post-FY
+            # self-assessment paid on or before it reduces the base.
+            table.get("s234a.sat_before_due_date_reduces_base", ay_ref_date)
             sat = sum((p.amount for p in post_fy if p.paid_on <= due_date),
                       Decimal("0"))
             base = _round_down(net - advance_total - sat, m100)
