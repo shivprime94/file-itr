@@ -20,10 +20,19 @@ def test_trace_records_rule_key_and_source():
 
 
 def test_trace_flags_contested_lines():
-    # gold ETF uses the 'contested' listed_nonequity threshold rule
+    # trace_bucketing flags a line iff its classify rule is 'contested'. Build a
+    # table where the gold-ETF path rule is contested and assert the line is
+    # flagged. (Tests the flagging behaviour itself, not which production rule
+    # happens to be contested — holding.listed_nonequity.lt_months is settled.)
+    from dataclasses import replace
+    base = TABLE.get("holding.listed_nonequity.lt_months", REF)
+    contested = replace(base, confidence="contested",
+                        contested_note="synthetic — exercises contested flagging")
+    tbl = RuleTable([r for r in TABLE.all()
+                     if r.key != "holding.listed_nonequity.lt_months"] + [contested])
     item = CapitalGainItem(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2026, 5, 1),
                            Decimal("20000"), Decimal("0"))
-    tr = trace_bucketing([item], TABLE, REF)
+    tr = trace_bucketing([item], tbl, REF)
     assert len(tr.contested()) == 1
 
 
