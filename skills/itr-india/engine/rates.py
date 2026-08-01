@@ -94,11 +94,17 @@ def compute_tax(buckets: dict, taxpayer: Taxpayer, table: RuleTable,
         table.get("exemption.ltcg_112a", ay_ref_date).value, Decimal("0"))
 
     # Residents set unexhausted basic exemption against 111A/112/112A — never
-    # VDA (s.115BBH). check_scope already refuses non-residents in Phase 1,
-    # but guard anyway so the rule stays load-bearing if that changes.
+    # VDA (s.115BBH). VDA still *consumes* the exemption residual for the
+    # purpose of measuring what remains: if VDA alone already fills total
+    # income above the BEL, no 111A/112/112A relief remains. check_scope
+    # already refuses non-residents in Phase 1, but guard anyway so the rule
+    # stays load-bearing if that changes.
     if taxpayer.resident and table.get(
             "basic_exemption.adjust_against_special_cg", ay_ref_date).value:
-        unexhausted = max(exemption_limit - slab_base, Decimal("0"))
+        # Income that is taxed but cannot itself absorb BEL still counts toward
+        # whether any BEL residual exists (VDA @ s.115BBH).
+        bel_base = slab_base + raw[Bucket.VDA_115BBH]
+        unexhausted = max(exemption_limit - bel_base, Decimal("0"))
         order = [Bucket(v) for v in
                  table.get("engine.basic_exemption_adjust_order", ay_ref_date).value]
         for b in order:

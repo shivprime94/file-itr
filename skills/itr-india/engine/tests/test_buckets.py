@@ -56,14 +56,32 @@ def test_debt_50aa_pre_2023_04_01_raises():
 
 
 def test_gold_etf_long_term_is_112():
-    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2026, 5, 1), 20000), TABLE, REF)
+    # Acquired on/after 1-Apr-2025 → 12-month LT threshold.
+    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2026, 5, 1), 20000), TABLE, REF)
     assert b is Bucket.LTCG_112
 
 
 def test_gold_etf_short_term_is_slab():
-    # FINDING 3: GOLD_ETF_LISTED short side (<12m) untested
-    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2025, 6, 1), 15000), TABLE, REF)
+    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2025, 6, 1), 15000), TABLE, REF)
     assert b is Bucket.STCG_SLAB
+
+
+def test_gold_etf_transitional_24m_still_short_at_16_months():
+    # Acquired 23-Jul-2024..31-Mar-2025 → 24-month threshold, not 12.
+    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2026, 5, 1), 20000), TABLE, REF)
+    assert b is Bucket.STCG_SLAB
+
+
+def test_gold_etf_transitional_24m_long_term():
+    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2024, 8, 1), date(2026, 9, 1), 20000), TABLE, REF)
+    assert b is Bucket.LTCG_112
+
+
+def test_gold_etf_pre_jul2024_refused():
+    from engine.scope import OutOfScopeError
+    import pytest
+    with pytest.raises(OutOfScopeError, match="before 23-Jul-2024"):
+        classify(cg(AssetClass.GOLD_ETF_LISTED, date(2023, 6, 1), date(2025, 8, 1), 20000), TABLE, REF)
 
 
 def test_land_building_long_term_is_112():

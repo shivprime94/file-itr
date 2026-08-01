@@ -5,6 +5,16 @@ from decimal import Decimal
 from enum import Enum
 from engine.model import CapitalGainItem, VdaItem, AssetClass
 from engine.rulebase import RuleTable
+from engine.scope import OutOfScopeError
+
+# Finance (No.2) Act 2024 reclassification of listed non-equity units (e.g. gold
+# ETFs): 24-month transitional threshold for units acquired 23-Jul-2024 through
+# 31-Mar-2025; 12 months for acquisitions on/after 1-Apr-2025. Kept here (not
+# only in the rule note) so classify cannot silently apply 12m to transitional
+# stock. Pre-23-Jul-2024 acquisitions are out of Phase 1 scope (older 36m rule).
+_LISTED_NONEQUITY_12M_FROM = date(2025, 4, 1)
+_LISTED_NONEQUITY_TRANSITIONAL_FROM = date(2024, 7, 23)
+_LISTED_NONEQUITY_TRANSITIONAL_MONTHS = 24
 
 
 class Bucket(Enum):
@@ -14,6 +24,20 @@ class Bucket(Enum):
     LTCG_112A = "ltcg_112a"
     LTCG_112 = "ltcg_112"
     VDA_115BBH = "vda_115bbh"
+
+
+def _listed_nonequity_lt_months(acquisition_date: date, table: RuleTable,
+                                ay_ref_date: date) -> tuple[int, str]:
+    """Return (months, rule_key) for gold/listed non-equity holding period."""
+    if acquisition_date >= _LISTED_NONEQUITY_12M_FROM:
+        r = table.get("holding.listed_nonequity.lt_months", ay_ref_date)
+        return r.value, r.key
+    if acquisition_date >= _LISTED_NONEQUITY_TRANSITIONAL_FROM:
+        # Transitional 24m — same contested rule key so traces still flag it.
+        return _LISTED_NONEQUITY_TRANSITIONAL_MONTHS, "holding.listed_nonequity.lt_months"
+    raise OutOfScopeError(
+        "listed non-equity / gold ETF acquired before 23-Jul-2024: pre-Finance "
+        "(No.2) Act 2024 holding-period rules are not modeled in Phase 1")
 
 
 def classify(item, table: RuleTable, ay_ref_date: date) -> tuple[Bucket, str]:
@@ -32,9 +56,10 @@ def classify(item, table: RuleTable, ay_ref_date: date) -> tuple[Bucket, str]:
             lt = item.held_more_than_months(r.value)
             return (Bucket.LTCG_112A, r.key) if lt else (Bucket.STCG_111A, r.key)
         if a is AssetClass.GOLD_ETF_LISTED:
-            r = table.get("holding.listed_nonequity.lt_months", ay_ref_date)
-            lt = item.held_more_than_months(r.value)
-            return (Bucket.LTCG_112, r.key) if lt else (Bucket.STCG_SLAB, r.key)
+            months, key = _listed_nonequity_lt_months(
+                item.acquisition_date, table, ay_ref_date)
+            lt = item.held_more_than_months(months)
+            return (Bucket.LTCG_112, key) if lt else (Bucket.STCG_SLAB, key)
         if a in (AssetClass.LAND_BUILDING, AssetClass.UNLISTED_SHARES):
             r = table.get("holding.other.lt_months", ay_ref_date)
             lt = item.held_more_than_months(r.value)
@@ -43,7 +68,6 @@ def classify(item, table: RuleTable, ay_ref_date: date) -> tuple[Bucket, str]:
     raise ValueError(
         f"internal invariant violated: unclassifiable item {item!r} reached classify; "
         "check_scope should have refused it")
-
 
 def bucket_income(items: list, table: RuleTable, ay_ref_date: date) -> dict[Bucket, Decimal]:
     out: dict[Bucket, Decimal] = defaultdict(lambda: Decimal("0"))

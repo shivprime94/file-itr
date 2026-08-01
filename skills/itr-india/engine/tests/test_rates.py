@@ -211,6 +211,15 @@ def test_basic_exemption_never_absorbs_vda():
     assert r.special_tax[Bucket.VDA_115BBH] == Decimal("30000")
 
 
+def test_basic_exemption_residual_reduced_by_vda():
+    # VDA 5L already fills the 4L new-regime BEL; 111A 2L must not be zeroed
+    # by a residual computed from slab_base alone (slab_base=0 → old bug).
+    r = compute_tax(bk(normal=0, s111a=200000, vda=500000), tp(), TABLE, REF)
+    assert r.special_taxable[Bucket.STCG_111A] == Decimal("200000")
+    assert r.special_tax[Bucket.STCG_111A] == Decimal("40000")
+    assert r.special_tax[Bucket.VDA_115BBH] == Decimal("150000")
+
+
 # ---------------- surcharge ----------------
 
 def test_no_surcharge_at_or_below_50l():

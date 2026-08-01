@@ -22,16 +22,16 @@ def st_111a(gain):  # listed equity, STT, held < 12m
     return cg(AssetClass.LISTED_EQUITY_STT, date(2024, 1, 1), date(2024, 11, 1), gain, stt=True)
 
 
-def st_slab(gain):  # gold ETF held < 12m
-    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2025, 6, 1), gain)
+def st_slab(gain):  # gold ETF held < 12m (post-1-Apr-2025 acq → 12m threshold)
+    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2025, 6, 1), gain)
 
 
 def lt_112a(gain):  # equity MF, STT, held > 12m
     return cg(AssetClass.EQUITY_MF_STT, date(2023, 1, 1), date(2024, 6, 1), gain, stt=True)
 
 
-def lt_112(gain):  # gold ETF held > 12m
-    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2026, 5, 1), gain)
+def lt_112(gain):  # gold ETF held > 12m (post-1-Apr-2025 acq)
+    return cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2026, 5, 1), gain)
 
 
 def bf(kind, ay, amount, timely=True):
@@ -168,6 +168,17 @@ def test_bf_last_usable_year_boundary():
     # AY 2019 loss usable through AY 2027 (== current AY): still usable.
     r = run([st_111a(50000)], [bf(CFLossKind.STCL, 2019, 10000)])
     assert r.buckets[Bucket.STCG_111A] == Decimal("40000")
+
+
+def test_bf_remainder_on_last_usable_year_expires_not_carried():
+    # AY 2019 loss usable through AY 2027. Absorb 30k of 100k; remainder must
+    # die under s.74(2), not reappear as carry_forward for AY 2028+.
+    r = run([st_111a(30000)], [bf(CFLossKind.STCL, 2019, 100000)])
+    assert r.buckets[Bucket.STCG_111A] == Decimal("0")
+    assert r.carry_forward == []
+    [d] = [x for x in r.dead if "remainder expires" in x.reason]
+    assert d.amount == Decimal("70000")
+    assert d.rule_key == "s74.cf_years"
 
 
 def test_bf_without_timely_return_is_dead_not_carried():

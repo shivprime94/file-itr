@@ -217,23 +217,32 @@ def tax_new(x):
         else: return t+(x-p)*r
     return t+(x-2400000)*.30
 
-def tax_old(x, senior=False):              # senior (60-79): first slab to 3L; 80+: to 5L
-    base = 300000 if senior else 250000
-    slabs=[(base,0),(500000,.05),(1000000,.20)]
-    t=p=0
-    for cap,r in slabs:
-        cap=max(cap,p)
-        if x>cap: t+=(cap-p)*r; p=cap
-        else: return t+(x-p)*r
-    return t+(x-1000000)*.30
+def tax_old(x, age="below_60"):
+    # age: "below_60" | "senior" (60-79, nil to 3L) | "super_senior" (80+, nil to 5L)
+    base = {"below_60": 250000, "senior": 300000, "super_senior": 500000}[age]
+    if age == "super_senior":
+        slabs = [(base, 0), (1000000, .20)]
+    else:
+        slabs = [(base, 0), (500000, .05), (1000000, .20)]
+    t = p = 0
+    for cap, r in slabs:
+        cap = max(cap, p)
+        if x > cap:
+            t += (cap - p) * r
+            p = cap
+        else:
+            return t + (x - p) * r
+    return t + (x - 1000000) * .30
 
 # Compute taxable income SEPARATELY per regime: old allows std ded 50k + Ch-VIA
 # deductions; new allows std ded 75k and almost no deductions.
 # Add special-rate items (e.g. STCG u/s 111A @ its rate) on TOP of slab tax,
 # then add 4% health & education cess. Apply 87A rebate where eligible — new
-# regime (Finance Act 2025): compare SLAB-ONLY income (excl. special-rate
-# income) to 12L, not total income; special-rate income never gets rebated
-# or counted toward the 12L test. See tax-regimes-and-slabs.md.
+# regime (Finance Act 2025): compare SLAB-ONLY income (excl. 111A/112/112A) to
+# 12L, not total income; special-rate tax is never rebated. Whether VDA
+# (s.115BBH) counts toward the 12L test is not settled here — if including
+# VDA would change the rebate, do not auto-rebate; verify against the portal
+# or a primary source. See tax-regimes-and-slabs.md.
 ```
 
 Then reconcile against the portal's Part B-TTI line by line: gross tax, cess,

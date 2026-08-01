@@ -91,11 +91,20 @@ you can't choose to carry it forward while showing taxable gains.
 
 ### 87A rebate vs special-rate gains (new regime, AY 2026-27 on)
 
-The Section 87A rebate (total income ≤ ₹12L → rebate up to ₹60,000) applies
-only to **slab-rate** tax — not to 111A/112A/112 special-rate tax. So non-equity
-fund STCG (slab) is effectively rebateable, while even ₹1 of equity STCG u/s
-111A produces tax a sub-₹12L filer must actually pay. Equity LTCG within the
-112A ₹1.25L exemption is nil regardless.
+Finance Act 2025: the Section 87A rebate (up to ₹60,000) uses **slab-base
+income** — normal + slab-rate STCG, **excluding** 111A/112/112A special-rate
+income — for both the ₹12L eligibility test and marginal relief. It never
+offsets special-rate tax. So:
+
+- ~₹11L salary + large 112A LTCG can still get a full slab rebate even though
+  *total* income exceeds ₹12L (only the slab portion is tested).
+- Non-equity fund STCG (slab) counts toward the ₹12L test and is rebateable;
+  even ₹1 of equity STCG u/s 111A produces special-rate tax a sub-₹12L filer
+  must actually pay.
+- Equity LTCG within the 112A ₹1.25L exemption is nil regardless.
+
+Whether VDA (s.115BBH) is excluded from the ₹12L test like 111A/112/112A is
+**not** treated as settled here — see `tax-regimes-and-slabs.md`.
 
 ### Quarterly breakup matters (for 234C interest)
 

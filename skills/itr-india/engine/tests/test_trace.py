@@ -21,7 +21,7 @@ def test_trace_records_rule_key_and_source():
 
 def test_trace_flags_contested_lines():
     # gold ETF uses the 'contested' listed_nonequity threshold rule
-    item = CapitalGainItem(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2026, 5, 1),
+    item = CapitalGainItem(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2026, 5, 1),
                            Decimal("20000"), Decimal("0"))
     tr = trace_bucketing([item], TABLE, REF)
     assert len(tr.contested()) == 1
