@@ -56,32 +56,39 @@ def test_debt_50aa_pre_2023_04_01_raises():
 
 
 def test_gold_etf_long_term_is_112():
-    # Acquired on/after 1-Apr-2025 → 12-month LT threshold.
+    # Listed gold ETF held > 12 months (s.2(42A), w.e.f. 23-Jul-2024) → LTCG u/s 112.
     b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2026, 5, 1), 20000), TABLE, REF)
     assert b is Bucket.LTCG_112
 
 
 def test_gold_etf_short_term_is_slab():
+    # Held <= 12 months → STCG at slab.
     b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 4, 1), date(2025, 6, 1), 15000), TABLE, REF)
     assert b is Bucket.STCG_SLAB
 
 
-def test_gold_etf_transitional_24m_still_short_at_16_months():
-    # Acquired 23-Jul-2024..31-Mar-2025 → 24-month threshold, not 12.
-    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2026, 5, 1), 20000), TABLE, REF)
-    assert b is Bucket.STCG_SLAB
-
-
-def test_gold_etf_transitional_24m_long_term():
-    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2024, 8, 1), date(2026, 9, 1), 20000), TABLE, REF)
+def test_gold_etf_15_months_is_long_term_not_slab():
+    # Flat 12-month threshold regardless of acquisition date: a gold ETF acquired
+    # 1-Sep-2024 and sold 1-Dec-2025 (15 months, FY 2025-26) is LONG-term u/s 112,
+    # NOT short-term slab. No 24-month acquisition-date transitional exists — for
+    # AY 2026-27 gold ETFs are outside s.50AA and take the s.2(42A) 12-month rule.
+    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2024, 9, 1), date(2025, 12, 1), 20000), TABLE, REF)
     assert b is Bucket.LTCG_112
 
 
-def test_gold_etf_pre_jul2024_refused():
-    from engine.scope import OutOfScopeError
-    import pytest
-    with pytest.raises(OutOfScopeError, match="before 23-Jul-2024"):
-        classify(cg(AssetClass.GOLD_ETF_LISTED, date(2023, 6, 1), date(2025, 8, 1), 20000), TABLE, REF)
+def test_gold_etf_pre_jul2024_acquisition_is_long_term():
+    # A gold ETF acquired before 23-Jul-2024 and sold in FY 2025-26, held > 12
+    # months, is an ordinary LTCG u/s 112 — NOT out of scope (the earlier
+    # acquisition-date fail-loud over-refused it).
+    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2023, 6, 1), date(2025, 8, 1), 20000), TABLE, REF)
+    assert b is Bucket.LTCG_112
+
+
+def test_gold_etf_boundary_exact_12_months_is_short():
+    # Calendar-exact: acquired 2025-01-01, sold exactly 2026-01-01 (12 months to
+    # the day) → short-term (not MORE than 12 months).
+    b, _ = classify(cg(AssetClass.GOLD_ETF_LISTED, date(2025, 1, 1), date(2026, 1, 1), 20000), TABLE, REF)
+    assert b is Bucket.STCG_SLAB
 
 
 def test_land_building_long_term_is_112():

@@ -7,14 +7,14 @@ from engine.model import CapitalGainItem, VdaItem, AssetClass
 from engine.rulebase import RuleTable
 from engine.scope import OutOfScopeError
 
-# Finance (No.2) Act 2024 reclassification of listed non-equity units (e.g. gold
-# ETFs): 24-month transitional threshold for units acquired 23-Jul-2024 through
-# 31-Mar-2025; 12 months for acquisitions on/after 1-Apr-2025. Kept here (not
-# only in the rule note) so classify cannot silently apply 12m to transitional
-# stock. Pre-23-Jul-2024 acquisitions are out of Phase 1 scope (older 36m rule).
-_LISTED_NONEQUITY_12M_FROM = date(2025, 4, 1)
-_LISTED_NONEQUITY_TRANSITIONAL_FROM = date(2024, 7, 23)
-_LISTED_NONEQUITY_TRANSITIONAL_MONTHS = 24
+# Finance (No.2) Act 2024 (s.2(42A), w.e.f. 23-Jul-2024) gives a LISTED unit that
+# is not an equity-oriented-fund unit — gold/silver ETF, listed debt/hybrid/REIT/
+# InVIT/AIF unit — a flat 12-month long-term threshold, with NO acquisition-date
+# grandfathering. For AY 2026-27 gold/silver ETFs are also outside s.50AA (the new
+# ">65% debt" specified-mutual-fund definition applies from AY 2026-27), so the
+# ordinary holding-period test governs. The threshold lives in the rule table
+# (holding.listed_nonequity.lt_months); classify() reads it directly, exactly as
+# it does for listed equity — there is no 24-month "transitional" band.
 
 # s.55(2)(ac): equity share/equity-MF unit acquired before 1-Feb-2018 gets a
 # grandfathered cost of acquisition for s.112A purposes (only post-31-Jan-2018
@@ -29,20 +29,6 @@ class Bucket(Enum):
     LTCG_112A = "ltcg_112a"
     LTCG_112 = "ltcg_112"
     VDA_115BBH = "vda_115bbh"
-
-
-def _listed_nonequity_lt_months(acquisition_date: date, table: RuleTable,
-                                ay_ref_date: date) -> tuple[int, str]:
-    """Return (months, rule_key) for gold/listed non-equity holding period."""
-    if acquisition_date >= _LISTED_NONEQUITY_12M_FROM:
-        r = table.get("holding.listed_nonequity.lt_months", ay_ref_date)
-        return r.value, r.key
-    if acquisition_date >= _LISTED_NONEQUITY_TRANSITIONAL_FROM:
-        # Transitional 24m — same contested rule key so traces still flag it.
-        return _LISTED_NONEQUITY_TRANSITIONAL_MONTHS, "holding.listed_nonequity.lt_months"
-    raise OutOfScopeError(
-        "listed non-equity / gold ETF acquired before 23-Jul-2024: pre-Finance "
-        "(No.2) Act 2024 holding-period rules are not modeled in Phase 1")
 
 
 def classify(item, table: RuleTable, ay_ref_date: date) -> tuple[Bucket, str]:
@@ -61,10 +47,9 @@ def classify(item, table: RuleTable, ay_ref_date: date) -> tuple[Bucket, str]:
             lt = item.held_more_than_months(r.value)
             return (Bucket.LTCG_112A, r.key) if lt else (Bucket.STCG_111A, r.key)
         if a is AssetClass.GOLD_ETF_LISTED:
-            months, key = _listed_nonequity_lt_months(
-                item.acquisition_date, table, ay_ref_date)
-            lt = item.held_more_than_months(months)
-            return (Bucket.LTCG_112, key) if lt else (Bucket.STCG_SLAB, key)
+            r = table.get("holding.listed_nonequity.lt_months", ay_ref_date)
+            lt = item.held_more_than_months(r.value)
+            return (Bucket.LTCG_112, r.key) if lt else (Bucket.STCG_SLAB, r.key)
         if a in (AssetClass.LAND_BUILDING, AssetClass.UNLISTED_SHARES):
             r = table.get("holding.other.lt_months", ay_ref_date)
             lt = item.held_more_than_months(r.value)

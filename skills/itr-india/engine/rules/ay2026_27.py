@@ -26,6 +26,24 @@ _CLEARTAX_50AA = "https://cleartax.in/s/section-50aa-income-tax-act"
 # a search URL; the listed_nonequity gap is called out in the report for the
 # controller to adjudicate (a fresher primary should be sourced later).
 _IK_2_42A = "https://indiankanoon.org/doc/545792/"
+# Gold/listed-non-equity holding period, verified by WebFetch (2026-08-01):
+# Taxmann's Finance (No.2) Act 2024 capital-gains note — "the 12-month holding
+# period now applies to units of debt-oriented or hybrid funds, AIFs, REITs,
+# InVITs, gold ETFs, etc., provided they are listed on a recognised stock
+# exchange in India ... no grandfathering provisions for listed units based on
+# acquisition date" (a flat > 12-month threshold, w.e.f. 23-Jul-2024, NO
+# 24-month acquisition-date transitional). ClearTax's gold-ETF page corroborates
+# the FY 2025-26 outcome directly ("held for more than 12 months ... LTCG ...
+# 12.5% without indexation"; 13 months = long-term). TaxGuru's s.50AA note
+# (fetched) quotes the commencement clause for the narrowed "specified mutual
+# fund" definition — "take effect from 1st day of April, 2026 and ... apply in
+# relation to the assessment year 2026-2027" — i.e. gold/silver ETFs exit s.50AA
+# from AY 2026-27 and revert to the ordinary holding-period test. The bare
+# gazetted Finance (No.2) Act 2024 s.2(42A)/s.50AA text 403s to automated fetch;
+# these three fetched top-tier secondaries converge and are the cited authority.
+_TAXMANN_CG_FA2024 = "https://www.taxmann.com/post/blog/key-amendments-to-capital-gains-provisions-under-the-finance-no-2-act"
+_CLEARTAX_GOLD_ETF = "https://cleartax.in/s/gold-etfs-vs-mutual-funds-taxation-guide"
+_TAXGURU_50AA_FA2024 = "https://taxguru.in/income-tax/amendment-specified-mutual-fund-definition-section-50aa-budget-2024.html"
 # "Section 24 in The Finance Act, 2023" — the enacting provision that inserts
 # s.50AA into the Income-tax Act; contains "Specified Mutual Fund" and the
 # "1st day of April, 2023" effective-date language, which corroborates
@@ -160,11 +178,26 @@ TABLE = RuleTable([
          source_primary=_IK_2_42A, source_secondary=_CLEARTAX_STCG,
          effective_from=date(2025, 4, 1), effective_to=None, confidence="settled"),
     Rule(key="holding.listed_nonequity.lt_months", value=12,
-         authority="s.2(42A) — listed non-equity units, units acquired on/after 1-Apr-2025",
-         source_primary=_IK_2_42A, source_secondary=_QUICKO_HP,
-         effective_from=date(2025, 4, 1), effective_to=None, confidence="contested",
-         contested_note="Units acquired 23-Jul-2024..31-Mar-2025 carried a 24-month "
-                        "transitional threshold; 12-month applies for acquisitions on/after 1-Apr-2025."),
+         authority="s.2(42A) (Finance (No.2) Act 2024, w.e.f. 23-Jul-2024) — a listed "
+                   "unit other than an equity-oriented-fund unit (gold/silver ETF, listed "
+                   "debt/hybrid/REIT/InVIT/AIF unit) is long-term if held > 12 months, "
+                   "with NO acquisition-date grandfathering. For AY 2026-27 gold/silver "
+                   "ETFs are outside s.50AA (the narrowed '>65% debt' specified-mutual-"
+                   "fund definition applies from AY 2026-27), so the holding-period test "
+                   "governs (12 months flat, keyed off holding duration not acquisition date)",
+         source_primary=_TAXMANN_CG_FA2024, source_secondary=_CLEARTAX_GOLD_ETF,
+         effective_from=date(2024, 7, 23), effective_to=None, confidence="contested",
+         contested_note="Value/threshold corrected: an earlier reading (issues #22/#27) "
+                        "applied a 24-month 'transitional' threshold to units acquired "
+                        "23-Jul-2024..31-Mar-2025, keyed off acquisition date. That "
+                        "transitional had no primary backing — Taxmann states the 12-month "
+                        "listed-unit rule has 'no grandfathering ... based on acquisition "
+                        "date', and gold/silver ETFs exit s.50AA from AY 2026-27 (TaxGuru, "
+                        "commencement 'in relation to the assessment year 2026-2027'), so a "
+                        "flat 12-month threshold governs every in-scope gold-ETF transfer. "
+                        "Kept 'contested' only because the bare gazetted Finance (No.2) Act "
+                        "2024 s.2(42A)/s.50AA text 403s to automated fetch; three fetched "
+                        "top-tier secondaries converge (see source comment)."),
     Rule(key="holding.other.lt_months", value=24,
          authority="s.2(42A) — other capital assets",
          source_primary=_IK_2_42A, source_secondary=_QUICKO_HP,

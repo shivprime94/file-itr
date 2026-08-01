@@ -57,34 +57,34 @@ Traps to check explicitly:
 
 Watch the asset type before assuming 111A/112A:
 
-- **Gold / silver ETFs** (listed, not equity-oriented): short-term → **STCG at
+- **Gold / silver ETFs** (listed, not equity-oriented): **long-term at
+  > 12 months → 12.5% without indexation u/s 112**; **≤ 12 months → STCG at the
   slab (applicable) rate**, reported under CG section A "sale of assets other
-  than A1–A4", not 111A. Long-term → **12.5% without indexation u/s 112**.
-  **Do not use a flat "12 months" rule** — the threshold is transitional.
+  than A1–A4" (not 111A). The threshold is a **flat 12 months** — there is **no**
+  acquisition-date "transitional" and **no** 24-month variant. Two Finance
+  (No.2) Act 2024 changes combine to give this for AY 2026-27:
+  - **s.2(42A) (w.e.f. 23 Jul 2024)** makes a *listed* unit other than an
+    equity-oriented-fund unit long-term at **> 12 months**, with **no
+    grandfathering by acquisition date**; and
+  - **s.50AA's** "specified mutual fund" definition was narrowed to *> 65% in
+    debt/money-market* **from AY 2026-27**, so gold/silver ETFs are **no longer**
+    always-short-term "specified mutual funds" and follow the ordinary
+    holding-period test.
 
-  For **AY 2026-27 the practical answer is decided by arithmetic** (no source
-  needed): a transfer this year happens by 31 Mar 2026, so
-  - a unit acquired **on/after 1 Apr 2025** cannot have been held 12 months, and
-  - a unit acquired in the **23 Jul 2024 – 31 Mar 2025** transitional window
-    cannot have been held its (longer) threshold either.
-
-  So **every gold ETF acquired on/after 23 Jul 2024 and sold in FY 2025-26 is
-  short-term → slab**, whatever the exact threshold. A gold-ETF **LTCG** in
-  AY 2026-27 can therefore only come from a **pre-23-Jul-2024** acquisition —
-  and those follow the older (36-month) rule and are **out of the engine's
-  Phase-1 scope** (`engine/scope.py` / `engine/buckets.py` refuse them), so
-  compute them by hand against the law in force on the transfer date.
-  - *For later years / completeness:* Finance (No.2) Act 2024 re-classified
-    listed non-equity units so the long-term threshold becomes **> 12 months**
-    for units **acquired on/after 1 Apr 2025**, with a **> 24-month**
-    transitional threshold for the **23 Jul 2024 – 31 Mar 2025** window. This
-    mirrors `engine/buckets.py` (`_listed_nonequity_lt_months`) and the
-    `holding.listed_nonequity.lt_months` rule — which the engine itself marks
-    **`confidence="contested"`** because its bare-Act primary does not
-    corroborate the acquisition-date condition. Treat the two-range split as
-    **search-verified, not primary-confirmed** (no single fetched source stated
-    both thresholds, 2026-08-01); **verify before relying** for a year where it
-    actually changes the answer.
+  So a gold ETF **acquired 1 Sep 2024 and sold 1 Dec 2025 (15 months)** is
+  **long-term u/s 112**, *not* slab STCG; and one **bought before 23 Jul 2024**
+  and held > 12 months is an ordinary LTCG, *not* out of scope. (In the **prior**
+  year, FY 2024-25, gold ETFs were still s.50AA "specified mutual funds" →
+  always short-term regardless of holding — a different AY; don't carry that
+  back.) This matches the corrected `engine/buckets.py` /
+  `holding.listed_nonequity.lt_months`. Sources: [Taxmann, capital-gains
+  amendments under Finance (No.2) Act 2024](https://www.taxmann.com/post/blog/key-amendments-to-capital-gains-provisions-under-the-finance-no-2-act)
+  ("the 12-month holding period now applies to units of … gold ETFs, etc.,
+  provided they are listed … no grandfathering … based on acquisition date");
+  [ClearTax, gold ETFs vs gold funds](https://cleartax.in/s/gold-etfs-vs-mutual-funds-taxation-guide)
+  ("held for more than 12 months … LTCG … 12.5% without indexation");
+  [TaxGuru, s.50AA amendment](https://taxguru.in/income-tax/amendment-specified-mutual-fund-definition-section-50aa-budget-2024.html)
+  (new definition applies "in relation to the assessment year 2026-2027").
 - **Liquid / debt ETFs and debt mutual funds** are typically **"specified mutual
   funds" u/s 50AA** → gains taxed at **slab rate regardless of holding period**.
 
