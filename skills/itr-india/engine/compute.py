@@ -25,7 +25,9 @@ class Computation:
 
 
 def compute(taxpayer: Taxpayer, items: list, *, bf_losses: list = (),
-            normal_income: Decimal = Decimal("0"), tds: Decimal = Decimal("0"),
+            normal_income: Decimal = Decimal("0"),
+            dividend_income: Decimal = Decimal("0"),
+            tds: Decimal = Decimal("0"),
             advance_payments: list = (), self_assessment_date: date = None,
             filing_date: date = None, due_date: date = None,
             table: RuleTable = None, ay_ref_date: date = None) -> Computation:
@@ -33,21 +35,28 @@ def compute(taxpayer: Taxpayer, items: list, *, bf_losses: list = (),
 
     Interest (234A/B/C) is computed only when `self_assessment_date` is given —
     without it the result's `interest` is None and `total_payable` is tax only.
-    `normal_income` is the already-reconciled slab-rate income (salary after
-    standard deduction, interest, dividends...); the engine does not rebuild it.
-    `total_payable` is net of non-negative `tds` and the supplied advance-tax
-    payments; an excess credit is exposed separately as `refund_due`.
+    `normal_income` is the already-reconciled slab-rate income EXCLUDING
+    dividends (salary after standard deduction, interest, other sources...);
+    the engine does not rebuild it. `dividend_income` is additive on top of
+    `normal_income` (not a subset of it) — pass dividend separately so the
+    15% surcharge cap can reach it. `total_payable` is net of non-negative
+    `tds` and the supplied advance-tax payments; an excess credit is exposed
+    separately as `refund_due`.
     """
     table = table or _TABLE_AY2026_27
     # a date inside the relevant FY, so date-windowed rules resolve
     ay_ref_date = ay_ref_date or date(taxpayer.ay - 2, 6, 1)
 
+    if dividend_income < 0:
+        raise ValueError("dividend_income cannot be negative")
+
     check_scope(taxpayer, items)
     check_rate_scope(taxpayer, items, table, ay_ref_date)
 
     setoff = apply_setoff(items, list(bf_losses), taxpayer, table, ay_ref_date,
-                          normal_income=normal_income)
-    tax = compute_tax(setoff.buckets, taxpayer, table, ay_ref_date)
+                          normal_income=normal_income + dividend_income)
+    tax = compute_tax(setoff.buckets, taxpayer, table, ay_ref_date,
+                      dividend_income=dividend_income)
 
     interest = None
     if self_assessment_date is not None:

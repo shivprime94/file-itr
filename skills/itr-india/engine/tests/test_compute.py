@@ -118,3 +118,21 @@ def test_excess_tds_is_reported_as_refund_not_payable():
     report = render_report(c)
     assert "REFUND DUE: 25000" in report
     assert "TOTAL PAYABLE: 0" in report
+
+
+def test_dividend_income_negative_raises_valueerror():
+    with pytest.raises(ValueError, match="dividend_income"):
+        compute(TP, [], normal_income=Decimal("500000"),
+               dividend_income=Decimal("-100"))
+
+
+def test_dividend_income_flows_through_to_surcharge_cap():
+    # Matches test_dividend_tax_capped_at_15_percent_alone in test_rates.py:
+    # normal_income=20,000,000 + dividend_income=6,000,000 must produce the
+    # same buckets[NORMAL]=26,000,000 that test drives directly via bk().
+    c = compute(TP, [], normal_income=Decimal("20000000"),
+               dividend_income=Decimal("6000000"))
+    assert c.setoff.buckets[Bucket.NORMAL] == Decimal("26000000")
+    assert c.tax.slab_tax == Decimal("7380000")
+    assert c.tax.surcharge == Decimal("0.15") * Decimal("1800000") + \
+        Decimal("0.25") * Decimal("5580000")
