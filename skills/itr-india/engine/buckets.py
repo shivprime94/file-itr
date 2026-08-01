@@ -7,14 +7,14 @@ from engine.model import CapitalGainItem, VdaItem, AssetClass
 from engine.rulebase import RuleTable
 from engine.scope import OutOfScopeError
 
-# Finance (No.2) Act 2024 (s.2(42A), w.e.f. 23-Jul-2024) gives a LISTED unit that
-# is not an equity-oriented-fund unit — gold/silver ETF, listed debt/hybrid/REIT/
-# InVIT/AIF unit — a flat 12-month long-term threshold, with NO acquisition-date
-# grandfathering. For AY 2026-27 gold/silver ETFs are also outside s.50AA (the new
-# ">65% debt" specified-mutual-fund definition applies from AY 2026-27), so the
-# ordinary holding-period test governs. The threshold lives in the rule table
-# (holding.listed_nonequity.lt_months); classify() reads it directly, exactly as
-# it does for listed equity — there is no 24-month "transitional" band.
+# Finance (No. 2) Act, 2024, s.3(b) (eGazette; retrospective 23-Jul-2024) amends
+# s.2(42A) so a LISTED unit that is not an equity-oriented-fund unit — gold/
+# silver ETF, listed debt/hybrid/REIT/InVIT/AIF unit — has a flat 12-month
+# long-term threshold, with NO acquisition-date grandfathering. For AY 2026-27
+# gold/silver ETFs are also outside s.50AA (s.21(b) of the same Act, w.e.f.
+# 1-Apr-2026 — SMF = >65% debt / qualifying FoF). Threshold lives in the rule
+# table (holding.listed_nonequity.lt_months); classify() reads it directly —
+# there is no 24-month "transitional" band.
 
 # s.55(2)(ac): equity share/equity-MF unit acquired before 1-Feb-2018 gets a
 # grandfathered cost of acquisition for s.112A purposes (only post-31-Jan-2018

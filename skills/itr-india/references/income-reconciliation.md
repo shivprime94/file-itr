@@ -118,16 +118,18 @@ back to a document. If a number can't be sourced, stop and find the source.
 
 ## Schedule AL — assets & liabilities disclosure (high income)
 
-If **total income exceeds ₹1 crore** (ITR-2/ITR-3), Schedule AL must disclose
-cost of specified assets (immovable property, jewellery, vehicles, shares/
-securities, cash, bank balances) and related liabilities at year-end. It is a
-**disclosure only — it does not change the tax**. The threshold was **raised
-from ₹50 lakh to ₹1 crore for AY 2026-27** — so a taxpayer with total income
-between ₹50 lakh and ₹1 crore **no longer** fills Schedule AL (older ₹50 lakh
-summaries are stale for this year). Verified against the Income Tax
-Department's own **ITR-2 user manual, AY 2026-27**: "If your total income
-exceeds ₹1 crore, it is mandatory to disclose the details of movable and
-immovable assets in Schedule AL along with liabilities incurred in relation to
-such assets" ([ITD, File ITR-2 — user manual](https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/file-itr-2-online/itr-2-UM);
-the CBDT ITR-2/ITR-3 validation-rules PDFs cited in `form-selection-ay2026-27.md`
-are the enforcement primary but 403/​don't extract to automated fetch).
+If **total income is greater than ₹1 crore** (ITR-2/ITR-3), Schedule AL must
+disclose cost of specified assets (immovable property, jewellery, vehicles,
+shares/securities, cash, bank balances) and related liabilities at year-end. It
+is a **disclosure only — it does not change the tax**. The threshold was
+**raised from ₹50 lakh to ₹1 crore for AY 2026-27** — so total income between
+₹50 lakh and ₹1 crore **no longer** requires Schedule AL (older ₹50 lakh
+summaries are stale for this year). On the rule wording, **exactly ₹1 crore
+does not cross** the threshold.
+
+- **Primary (enforcement):** CBDT Directorate of Income Tax (Systems),
+  [ITR-2 Validation Rules for AY 2026-27, v1.0](https://www.incometax.gov.in/iec/foportal/sites/default/files/2026-05/CBDT__e-Filing_ITR%202_Validation%20Rules_AY%202026-27_V1.0.pdf),
+  **rule 456** (PDF p. 31): Schedule AL must be completed where total income is
+  greater than ₹1 crore.
+- **Secondary:** ITD ITR-2 user manual, AY 2026-27 (same “exceeds ₹1 crore”
+  phrasing) — [File ITR-2 user manual](https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/file-itr-2-online/itr-2-UM).

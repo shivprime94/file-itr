@@ -8,36 +8,34 @@
 
 ## The s.139(1) due dates
 
-The **Finance Act 2026 substituted Explanation 2 to s.139(1)** to add a new
-**31 August** tier. The date turns on the **type of income, not the ITR form**:
+The **Finance Act, 2026**, s.5(a) **substituted Explanation 2 to s.139(1)**
+(w.e.f. **1 March 2026**). Due date turns on the **type of income / audit
+status, not the ITR form**:
 
 | Assessee (AY 2026-27) | Due date |
 |---|---|
 | **No** business/profession income — salaried, pensioner, investor (ITR-1/ITR-2, and an ITR-3 filed for a non-business reason) | **31 July 2026** |
 | **Non-audit** business/profession income, and specified **partners** of such firms | **31 August 2026** |
 | Accounts **require a tax audit** (s.44AB), and their partners | **31 October 2026** |
-| Transfer-pricing (s.92E) cases | 30 November 2026 |
+| Transfer-pricing (s.92E) cases | **30 November 2026** |
 
-- **Verified (moved from "flag before relying").** This is a **permanent
-  statutory change, not a departmental extension** — a substituted Explanation 2,
-  effective for **AY 2026-27** (which is still governed by the Income-tax Act
-  1961; the new Income-tax Act 2025 applies from FY 2026-27). Confirmed on the
-  **Income Tax Department's own e-filing FAQ**: "For AY 2026-27 … the due date is
-  31st July, 2026 or 31st August for non-audit cases" ([ITD, Income Tax Returns
-  FAQ](https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/%20income%20tax%20returns-faq)).
-  The amended four-tier Explanation 2 is reproduced at [TaxGuru, AY 2026-27 ITR
-  due dates under Finance Act 2026](https://taxguru.in/income-tax/ay-2026-27-itr-due-dates-finance-act-2026.html).
-  The ultimate primary — the gazetted Finance Act 2026 / the Memorandum to the
-  Finance Bill on [indiabudget.gov.in](https://www.indiabudget.gov.in/doc/memo.pdf) —
-  is the enacting text but returns HTTP 403 to automated fetch; the ITD FAQ above
-  is the fetched authority.
-- **Watch the trigger — it is the income, not the form.** The 31 August tier is
-  for someone who *has* non-audit business/profession income — **not** anyone who
-  merely files ITR-3. A **director** or an **unlisted-share holder** with only
-  salary/capital gains files ITR-3 but has **no** business income → their date is
-  **31 July**. Conversely a **44ADA creator** or **44AD trader** (ITR-4/ITR-3)
-  gets **31 August**. When in doubt, ask "does this person have business or
-  profession income?" — that, not the form, sets the date.
+- **Primary.** Gazetted Finance Act, 2026, s.5(a) (Explanation 2 table: 30 Nov /
+  31 Oct / 31 Aug / 31 Jul) — [eGazette PDF](https://egazette.gov.in/WriteReadData/2026/271439.pdf)
+  (Act pages corresponding to Part II pp. 30–31 of that PDF). Presidential assent
+  30 March 2026; s.5 effective 1 March 2026 for AY 2026-27 under the Income-tax
+  Act, 1961 (the Income-tax Act, 2025 applies from FY 2026-27). Budget
+  memorandum: [indiabudget.gov.in memo](https://www.indiabudget.gov.in/doc/memo.pdf)
+  (PDF pp. 22–23 on the 1 March 2026 commencement).
+- **Secondary corroboration.** ITD e-filing FAQ ("31st July, 2026 or 31st August
+  for non-audit cases") and secondary write-ups of the four-tier table; use the
+  Gazette if anything conflicts.
+- **Watch the trigger — it is the income, not the form.** Row 3 of the enacted
+  table is an assessee with **PGBP income whose accounts are not required to be
+  audited** (and stated partners) → 31 August. Row 4 is **any other assessee** →
+  31 July. A **director** or **unlisted-share holder** with only salary/capital
+  gains files ITR-3 but has **no** business income → **31 July**. A **44ADA
+  creator** or **44AD trader** → **31 August**. When in doubt, ask whether the
+  person has business or profession income.
 - **s.234A follows the due date.** For a non-audit business filer the return-
   filing interest clock (below) now starts **1 September**, not 1 August — pass
   the correct `due_date` when computing s.234A (the engine takes it as input, it

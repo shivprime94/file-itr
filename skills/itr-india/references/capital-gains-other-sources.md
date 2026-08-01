@@ -76,17 +76,19 @@ Watch the asset type before assuming 111A/112A:
   and held > 12 months is an ordinary LTCG, *not* out of scope. (In the **prior**
   year, FY 2024-25, gold ETFs were still s.50AA "specified mutual funds" →
   always short-term regardless of holding — a different AY; don't carry that
-  back.) This matches the corrected `engine/buckets.py` /
-  `holding.listed_nonequity.lt_months`. Sources: [Taxmann, capital-gains
-  amendments under Finance (No.2) Act 2024](https://www.taxmann.com/post/blog/key-amendments-to-capital-gains-provisions-under-the-finance-no-2-act)
-  ("the 12-month holding period now applies to units of … gold ETFs, etc.,
-  provided they are listed … no grandfathering … based on acquisition date");
-  [ClearTax, gold ETFs vs gold funds](https://cleartax.in/s/gold-etfs-vs-mutual-funds-taxation-guide)
-  ("held for more than 12 months … LTCG … 12.5% without indexation");
-  [TaxGuru, s.50AA amendment](https://taxguru.in/income-tax/amendment-specified-mutual-fund-definition-section-50aa-budget-2024.html)
-  (new definition applies "in relation to the assessment year 2026-2027").
-- **Liquid / debt ETFs and debt mutual funds** are typically **"specified mutual
-  funds" u/s 50AA** → gains taxed at **slab rate regardless of holding period**.
+  back.) Unlisted gold-fund units still use the general **24-month** period
+  under s.2(42A). Matches `engine/buckets.py` /
+  `holding.listed_nonequity.lt_months`.
+
+  **Primary:** [Finance (No. 2) Act, 2024, eGazette](https://egazette.gov.in/WriteReadData/2024/256436.pdf)
+  s.3(b) (s.2(42A) — removes “other than a unit”; retrospective from 23 Jul 2024)
+  and s.21(b) (s.50AA SMF definition, w.e.f. 1 Apr 2026 / AY 2026-27). Budget
+  2024 memorandum notes gold ETFs/MFs among funds previously caught by the old
+  SMF test. **Secondary:** Taxmann / ClearTax gold-ETF notes; TaxGuru on the
+  s.50AA commencement.
+- **Liquid / debt ETFs and debt mutual funds** that meet the **>65% debt** SMF
+  test u/s **50AA** (AY 2026-27) → gains taxed at **slab rate regardless of
+  holding period**.
 
 These slab-rate STCG amounts add to normal income (not Schedule SI) and are taxed
 at the taxpayer's slab — which can be *higher* than the 111A rate for high

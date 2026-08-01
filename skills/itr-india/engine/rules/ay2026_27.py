@@ -26,29 +26,17 @@ _CLEARTAX_50AA = "https://cleartax.in/s/section-50aa-income-tax-act"
 # a search URL; the listed_nonequity gap is called out in the report for the
 # controller to adjudicate (a fresher primary should be sourced later).
 _IK_2_42A = "https://indiankanoon.org/doc/545792/"
-# Gold/listed-non-equity holding period. The Finance (No.2) Act 2024 amended the
-# first proviso to s.2(42A) by deleting "(other than a unit)", so the 12-month
-# long-term threshold now covers ALL listed securities including listed units
-# (gold/silver ETF, REIT/InVIT/business-trust/debt-fund units) — not only shares
-# and equity-oriented-fund units. Fetched authority (WebFetch 2026-08-01):
-# Taxmann's capital-gains note states the operative rule directly — "the 12-month
-# holding period now applies to units of debt-oriented or hybrid funds, AIFs,
-# REITs, InVITs, gold ETFs, etc., provided they are listed ... no grandfathering
-# ... based on acquisition date"; ClearTax's gold-ETF page corroborates the
-# FY 2025-26 outcome ("held for more than 12 months ... LTCG ... 12.5% without
-# indexation"). TaxGuru (fetched) quotes the s.50AA commencement — the narrowed
-# ">65% debt" specified-mutual-fund definition applies "in relation to the
-# assessment year 2026-2027" — so gold/silver ETFs exit s.50AA from AY 2026-27
-# and take the ordinary holding-period test.
-# SOURCING NOTE: the bare gazetted s.2(42A)/s.50AA text could not be fetched
-# (egazette / consolidated-Act PDFs do not extract; ITD /w/ pages 403; TaxTMI /
-# taxsutra paywalled; free indiankanoon mirrors are pre-amendment). The rule is
-# marked "settled" on the fetched top-tier secondaries — the law is unambiguous
-# and this matches how rate.stcg_111a / rate.ltcg_112a / slab.new_regime are
-# already settled on cleartax/bajajamc. effective_from is set to 1-Apr-2025
-# (indisputably in force for all of FY 2025-26, the only PY this engine computes;
-# sources vary on the s.2(42A) commencement — 23-Jul-2024 vs 1-Oct-2024 — which
-# is immaterial for AY 2026-27).
+# Gold/listed-non-equity holding period. Finance (No. 2) Act, 2024, s.3(b)
+# (eGazette) amends s.2(42A) with retrospective effect from 23-Jul-2024:
+# deletes "(other than a unit)" from the first proviso so the 12-month
+# long-term threshold covers listed securities including listed units
+# (gold/silver ETF, REIT/InVIT/business-trust/debt-fund units, etc.). Same Act
+# s.21(b) substitutes the s.50AA "specified mutual fund" definition (w.e.f.
+# 1-Apr-2026 / AY 2026-27) to >65% debt and qualifying FoFs — gold/silver ETFs
+# exit the always-STCG deeming for this AY and take the ordinary holding test.
+# Primary: eGazette FA (No. 2) 2024 PDF. Secondary: Taxmann / ClearTax notes
+# (no acquisition-date grandfathering for the 12-month listed-unit limb).
+_EGAZETTE_FA_NO2_2024 = "https://egazette.gov.in/WriteReadData/2024/256436.pdf"
 _TAXMANN_CG_FA2024 = "https://www.taxmann.com/post/blog/key-amendments-to-capital-gains-provisions-under-the-finance-no-2-act"
 _CLEARTAX_GOLD_ETF = "https://cleartax.in/s/gold-etfs-vs-mutual-funds-taxation-guide"
 _TAXGURU_50AA_FA2024 = "https://taxguru.in/income-tax/amendment-specified-mutual-fund-definition-section-50aa-budget-2024.html"
@@ -186,16 +174,16 @@ TABLE = RuleTable([
          source_primary=_IK_2_42A, source_secondary=_CLEARTAX_STCG,
          effective_from=date(2025, 4, 1), effective_to=None, confidence="settled"),
     Rule(key="holding.listed_nonequity.lt_months", value=12,
-         authority="s.2(42A), Finance (No.2) Act 2024 — the first proviso was amended by "
-                   "deleting '(other than a unit)', so the 12-month long-term threshold "
-                   "now applies to ALL listed securities including listed units (gold/"
-                   "silver ETF, listed debt/hybrid/REIT/InVIT/AIF/business-trust units), "
-                   "with no acquisition-date grandfathering. For AY 2026-27 gold/silver "
-                   "ETFs are also outside s.50AA (its narrowed '>65% debt' specified-"
-                   "mutual-fund definition applies from AY 2026-27), so the ordinary "
-                   "holding-period test governs — a flat > 12 months by holding duration",
-         source_primary=_TAXMANN_CG_FA2024, source_secondary=_CLEARTAX_GOLD_ETF,
-         effective_from=date(2025, 4, 1), effective_to=None, confidence="settled"),
+         authority="s.2(42A) first proviso as amended by Finance (No. 2) Act, 2024, "
+                   "s.3(b) — deletes '(other than a unit)'; listed units (gold/silver "
+                   "ETF, listed debt/hybrid/REIT/InVIT/AIF/business-trust units) are "
+                   "long-term after more than 12 months, no acquisition-date "
+                   "grandfathering. Retrospective from 23-Jul-2024. For AY 2026-27 "
+                   "gold/silver ETFs are also outside s.50AA (s.21(b) of the same Act, "
+                   "w.e.f. 1-Apr-2026 — SMF = >65% debt / qualifying FoF), so the "
+                   "ordinary holding-period test governs",
+         source_primary=_EGAZETTE_FA_NO2_2024, source_secondary=_TAXMANN_CG_FA2024,
+         effective_from=date(2024, 7, 23), effective_to=None, confidence="settled"),
     Rule(key="holding.other.lt_months", value=24,
          authority="s.2(42A) — other capital assets",
          source_primary=_IK_2_42A, source_secondary=_QUICKO_HP,
@@ -205,8 +193,11 @@ TABLE = RuleTable([
          source_primary=_IK_50AA, source_secondary=_CLEARTAX_50AA,
          effective_from=date(2023, 4, 1), effective_to=None, confidence="settled"),
     Rule(key="s50aa.applies", value=True,
-         authority="s.50AA — specified MF gains always short-term (slab), any holding",
-         source_primary=_IK_50AA, source_secondary=_CLEARTAX_50AA,
+         authority="s.50AA — gains on units of a specified mutual fund always short-term "
+                   "(slab), any holding. AY 2026-27 SMF definition (Finance (No. 2) Act, "
+                   "2024, s.21(b), w.e.f. 1-Apr-2026): fund investing >65% in debt/"
+                   "money-market (or FoF into such) — not ordinary gold ETFs",
+         source_primary=_EGAZETTE_FA_NO2_2024, source_secondary=_TAXGURU_50AA_FA2024,
          effective_from=date(2023, 4, 1), effective_to=None, confidence="settled"),
     Rule(key="s115bbh.applies", value=Decimal("0.30"),
          authority="s.115BBH — VDA gains taxed at flat 30%, any holding period",
