@@ -17,9 +17,10 @@ Pipeline (`compute.compute()` runs all of it):
    machinery; per-item VDA loss quarantine (s.115BBH(2)(b)); brought-forward
    losses with the 8-AY window and timely-return gate.
 4. **Rates** (`rates.py`) — FY 2025-26 slabs (both regimes), s.87A rebate with
-   marginal relief, special rates (111A 20%, 112/112A 12.5%, ₹1.25L 112A
-   exemption, VDA 30%), resident basic-exemption adjustment, surcharge with
-   the 15% CG cap / 25% new-regime cap and marginal relief, 4% cess,
+   marginal relief, special rates (111A 20%, 112/112A 12.5% with s.55(2)(ac)
+   FMV grandfathering for pre-1-Feb-2018 acquisitions, ₹1.25L 112A exemption,
+   VDA 30%), resident basic-exemption adjustment, surcharge with the 15%
+   CG/dividend cap / 25% new-regime cap and marginal relief, 4% cess,
    s.288A/288B rounding.
 5. **Interest** (`interest.py`) — s.234A/234B/234C with Rule 119A rounding,
    the s.234C capital-gains carve-out, s.208 ₹10k floor, s.207(2) senior
@@ -44,6 +45,8 @@ scheme also counts as PGBP income for the Section 207(2) senior exemption gate.
 
 Structurally out of scope (inputs cannot express them): business/HP/foreign
 income, Chapter VI-A deductions, AMT, clubbing, s.89 relief. `normal_income`
-is the caller's already-reconciled slab-rate total.
+is the caller's already-reconciled slab-rate total, excluding dividends —
+pass dividend income separately via `dividend_income` so the 15% surcharge
+cap can reach it (compute.compute()).
 
-Run tests: `pytest skills/itr-india/engine/tests -v` (119 tests)
+Run tests: `pytest skills/itr-india/engine/tests -v` (144 tests)
