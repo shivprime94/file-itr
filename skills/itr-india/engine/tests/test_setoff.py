@@ -232,3 +232,11 @@ def test_trace_setoff_renders():
     tr = trace_setoff(r, TABLE, REF)
     out = tr.render()
     assert "s70.stcl_setoff_any_cg" in out
+
+
+def test_setoff_buckets_use_grandfathered_112a_gain():
+    item = CapitalGainItem(AssetClass.EQUITY_MF_STT, date(2016, 1, 1), date(2025, 8, 1),
+                           Decimal("1000000"), Decimal("100000"), stt_paid=True,
+                           fmv_31jan2018=Decimal("700000"))
+    result = run([item])
+    assert result.buckets[Bucket.LTCG_112A] == Decimal("300000")   # not raw 900000

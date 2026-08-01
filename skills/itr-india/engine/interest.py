@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from engine.buckets import Bucket, classify
+from engine.buckets import Bucket, classify, effective_gain
 from engine.model import (
     AdvanceTaxPayment, AgeBand, PresumptiveScheme, Taxpayer, VdaItem,
 )
@@ -166,12 +166,13 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
         for it in items:
             b, _ = classify(it, table, ay_ref_date)
             if b in _SPECIAL_CG or b is Bucket.STCG_SLAB:
-                if it.gain < 0:
+                gain = effective_gain(it, b, table, ay_ref_date)
+                if gain < 0:
                     raise OutOfScopeError(
                         "s.234C quarterly attribution with a capital loss in the mix "
                         "is not statute-determined — out of scope")
                 classified.append((b, it))
-                bucket_gains[b] = bucket_gains.get(b, Decimal("0")) + it.gain
+                bucket_gains[b] = bucket_gains.get(b, Decimal("0")) + gain
         for b, it in classified:
             sale = it.sale_date   # CapitalGainItem always has one; VdaItem may not
             if b is Bucket.VDA_115BBH and sale is None:
@@ -183,7 +184,7 @@ def compute_interest(tax: TaxComputation, tds: Decimal, payments: list,
                         "slab-rate STCG sold after the first instalment: its marginal-"
                         "rate attribution for s.234C is not statute-determined")
                 continue
-            share = it.gain / bucket_gains[b]
+            share = effective_gain(it, b, table, ay_ref_date) / bucket_gains[b]
             attributed = tax.special_tax[b] * share * (1 + cess)
             carve_items.append((sale, attributed))
 

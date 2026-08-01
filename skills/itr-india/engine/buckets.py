@@ -93,5 +93,5 @@ def bucket_income(items: list, table: RuleTable, ay_ref_date: date) -> dict[Buck
     out: dict[Bucket, Decimal] = defaultdict(lambda: Decimal("0"))
     for it in items:
         bucket, _ = classify(it, table, ay_ref_date)
-        out[bucket] += it.gain
+        out[bucket] += effective_gain(it, bucket, table, ay_ref_date)
     return dict(out)

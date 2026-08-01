@@ -294,3 +294,33 @@ def test_total_is_sum_of_components():
     r = run(t, payments=[pay(date(2026, 3, 10), 100000)],
             self_assessment_date=date(2026, 7, 15))
     assert r.total == r.i234a + r.i234b + r.i234c
+
+
+def test_234c_carveout_attribution_uses_grandfathered_gain():
+    # Two 112A items, equal *grandfathered* gain (1M each = 2M total).
+    # item_a: cost 10L, FMV 90L, sale 1cr, acquired 2016 -> COA=max(10L,min(90L,1cr))
+    #   = 90L, effective_gain = 1cr-90L = 10L (raw gain would be 90L).
+    #   Sold 2026-03-20, after the last (15-Mar) instalment -> the late-CG path.
+    # item_b: cost 20L, proceeds 30L, acquired 2023 (no grandfathering) -> gain 10L.
+    #   Sold 2025-05-01, before every instalment -> never appears in any "carved" sum.
+    item_a = CapitalGainItem(AssetClass.EQUITY_MF_STT, date(2016, 1, 1), date(2026, 3, 20),
+                             Decimal("10000000"), Decimal("1000000"), stt_paid=True,
+                             fmv_31jan2018=Decimal("9000000"))
+    item_b = CapitalGainItem(AssetClass.EQUITY_MF_STT, date(2023, 1, 1), date(2025, 5, 1),
+                             Decimal("3000000"), Decimal("2000000"), stt_paid=True)
+    # normal=400000 exactly exhausts the new-regime nil band (slab_tax=0, no
+    # unused basic-exemption residual left to absorb into the 112A taxable
+    # amount) so special_tax[112A] is simply (2,000,000 - 1,25,000 exemption)
+    # * 12.5% = 234,375, with no BEL-residual side effect to also account for.
+    t = tax_of(normal=400000, s112a=2000000)
+    r = run(t, payments=[pay(date(2025, 6, 10), 121875)],
+            items=[item_a, item_b], self_assessment_date=date(2026, 7, 15))
+    # With correct (grandfathered) 50/50 split: item_a's attributed tax is
+    # 234375 * 0.5 * 1.04 = 121,875, entirely carved as "late CG" (item_a sold
+    # after the last instalment); the 121,875 payment fully covers item_b's
+    # on-schedule 50% share (all 4 instalment rows clear), and also covers
+    # paid_to_mar31 for the late-CG proviso, leaving exactly 121,875
+    # "uncovered" -> i234c = round_down(121875, 100) * 1% * 1 month = 1,218.
+    # (Without the fix, raw gains 9M/1M would give a 90/10 split instead of
+    # 50/50, producing a different, wrong i234c.)
+    assert r.i234c == Decimal("1218")

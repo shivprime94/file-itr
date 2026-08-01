@@ -181,3 +181,10 @@ def test_effective_gain_non_112a_bucket_unchanged_even_if_pre2018():
                            fmv_31jan2018=Decimal("400000"))
     assert effective_gain(item, Bucket.LTCG_112, TABLE, REF) == item.gain
     assert effective_gain(item, Bucket.LTCG_112, TABLE, REF) == Decimal("900000")
+
+
+def test_bucket_income_applies_112a_grandfathering():
+    item = _cg_item(AssetClass.EQUITY_MF_STT, date(2016, 1, 1), date(2025, 8, 1),
+                    1000000, 100000, fmv=700000)
+    out = bucket_income([item], TABLE, REF)
+    assert out[Bucket.LTCG_112A] == Decimal("300000")   # not the raw 900000

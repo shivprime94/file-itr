@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
-from engine.buckets import Bucket, classify
+from engine.buckets import Bucket, classify, effective_gain
 from engine.model import BroughtForwardLoss, CFLossKind, Taxpayer, VdaItem
 from engine.rulebase import RuleTable
 from engine.scope import OutOfScopeError
@@ -99,7 +99,7 @@ def apply_setoff(items: list, bf_losses: list, taxpayer: Taxpayer,
                 f"item[{i}] VdaItem loss", -it.gain, vda_dead_rule.key,
                 "s.115BBH(2)(b): VDA loss — no set-off, no carry-forward"))
             continue
-        buckets[b] += it.gain
+        buckets[b] += effective_gain(it, b, table, ay_ref_date)
 
     # Current-year loss pools: negative CG buckets, zeroed as they're pooled.
     stcl = Decimal("0")
