@@ -260,6 +260,59 @@ def test_old_regime_surcharge_37_percent_above_5cr():
     assert r.surcharge == Decimal("0.37") * r.slab_tax
 
 
+# ---------------- dividend 15% surcharge cap ----------------
+
+def test_dividend_tax_capped_at_15_percent_alone():
+    # ti = 2.6cr (26,000,000) -> base rate 25%; but the dividend's own
+    # marginal slab tax slice is capped at 15% same as CG.
+    # slab_tax(26,000,000) = 7,380,000; slab_tax(26,000,000-6,000,000) =
+    # slab_tax(20,000,000) = 5,580,000 -> dividend_tax = 1,800,000.
+    r = compute_tax(bk(normal=26000000), tp(), TABLE, REF,
+                    dividend_income=Decimal("6000000"))
+    assert r.slab_tax == Decimal("7380000")
+    assert r.surcharge == Decimal("0.15") * Decimal("1800000") + \
+        Decimal("0.25") * Decimal("5580000")
+
+
+def test_dividend_and_cg_share_the_same_15_percent_cap():
+    # normal=6,000,000 (slab_tax 1,380,000), dividend_income=1,000,000 of it,
+    # s111a=20,000,000 (cg_tax 4,000,000). ti=26,000,000 -> 25% band.
+    # dividend_tax = slab_tax(6,000,000) - slab_tax(5,000,000)
+    #              = 1,380,000 - 1,080,000 = 300,000
+    # capped_tax = cg_tax(4,000,000) + dividend_tax(300,000) = 4,300,000,
+    # capped together at 15% (not double-capped, not capped separately).
+    r = compute_tax(bk(normal=6000000, s111a=20000000), tp(), TABLE, REF,
+                    dividend_income=Decimal("1000000"))
+    assert r.surcharge == Decimal("0.15") * Decimal("4300000") + \
+        Decimal("0.25") * Decimal("1080000")
+
+
+def test_dividend_marginal_relief_at_2cr_threshold():
+    # ti = 20,050,000 crosses the 2cr threshold by 50,000, all of which is
+    # dividend. dividend_tax = slab_tax(20,050,000) - slab_tax(20,000,000)
+    #                        = 5,595,000 - 5,580,000 = 15,000.
+    # rate at ti (25%) capped to 15% for that slice; rate at the threshold
+    # itself is 15% (not > 20,000,000, so no cap benefit there); the standard
+    # marginal-relief invariant holds: slab_tax + surcharge - relief == cap.
+    r = compute_tax(bk(normal=20050000), tp(), TABLE, REF,
+                    dividend_income=Decimal("50000"))
+    assert r.slab_tax + r.surcharge - r.marginal_relief == Decimal("6467000")
+
+
+def test_dividend_income_exceeding_slab_base_refused():
+    with pytest.raises(OutOfScopeError, match="dividend_income"):
+        compute_tax(bk(normal=100000), tp(), TABLE, REF,
+                   dividend_income=Decimal("200000"))
+
+
+def test_dividend_income_default_zero_matches_pre_existing_behavior():
+    # Regression guard: omitting dividend_income must reproduce the
+    # already-passing test_surcharge_cg_capped_at_15_percent exactly.
+    r = compute_tax(bk(normal=6000000, s111a=20000000), tp(), TABLE, REF)
+    assert r.surcharge == Decimal("0.15") * Decimal("4000000") + \
+        Decimal("0.25") * Decimal("1380000")
+
+
 # ---------------- rounding ----------------
 
 def test_income_rounded_288a():

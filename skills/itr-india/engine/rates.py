@@ -67,7 +67,8 @@ def _surcharge_on(tax_total: Decimal, cg_tax: Decimal, rate: Decimal,
 
 
 def compute_tax(buckets: dict, taxpayer: Taxpayer, table: RuleTable,
-                ay_ref_date: date) -> TaxComputation:
+                ay_ref_date: date,
+                dividend_income: Decimal = Decimal("0")) -> TaxComputation:
     """Phase 3: rates, rebate, surcharge, cess, rounding on post-set-off buckets."""
     if any(v < 0 for v in buckets.values()):
         raise OutOfScopeError("negative bucket reached the rate layer — run set-off first")
@@ -162,13 +163,20 @@ def compute_tax(buckets: dict, taxpayer: Taxpayer, table: RuleTable,
 
     tax_after_rebate = slab_tax + sum(special_tax.values()) - rebate
 
-    # --- surcharge, with 15% CG cap and marginal relief ---
+    # --- surcharge, with 15% CG/dividend cap and marginal relief ---
+    if dividend_income > slab_base:
+        raise OutOfScopeError(
+            "dividend_income exceeds slab_base — dividend_income must be a "
+            "subset of the income already folded into normal_income")
+    table.get("engine.dividend_surcharge_attribution", ay_ref_date)
+    dividend_tax = slab_tax - _slab_tax(slab_base - dividend_income, slabs)
+
     bands = table.get("surcharge.bands", ay_ref_date).value
     new_cap = table.get("surcharge.new_regime_cap", ay_ref_date).value
     cg_cap = table.get("surcharge.cg_dividend_cap", ay_ref_date).value
-    cg_tax = sum(special_tax[b] for b in _CG_SPECIAL)
+    capped_tax = sum(special_tax[b] for b in _CG_SPECIAL) + dividend_tax
     rate = _surcharge_rate(ti, bands, taxpayer.regime, new_cap)
-    surcharge = _surcharge_on(tax_after_rebate, cg_tax, rate, cg_cap)
+    surcharge = _surcharge_on(tax_after_rebate, capped_tax, rate, cg_cap)
 
     relief = Decimal("0")
     if surcharge > 0 and table.get("surcharge.marginal_relief", ay_ref_date).value:
@@ -182,7 +190,7 @@ def compute_tax(buckets: dict, taxpayer: Taxpayer, table: RuleTable,
         # (engine policy — see surcharge.marginal_relief contested note).
         tax_t = _slab_tax(slab_base - shave, slabs) + sum(special_tax.values())
         rate_t = _surcharge_rate(threshold, bands, taxpayer.regime, new_cap)
-        cap = tax_t + _surcharge_on(tax_t, cg_tax, rate_t, cg_cap) + shave
+        cap = tax_t + _surcharge_on(tax_t, capped_tax, rate_t, cg_cap) + shave
         relief = max(tax_after_rebate + surcharge - cap, Decimal("0"))
 
     pre_cess = tax_after_rebate + surcharge - relief
