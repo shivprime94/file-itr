@@ -14,17 +14,14 @@ _CLEARTAX_50AA = "https://cleartax.in/s/section-50aa-income-tax-act"
 # operative statutory text confirmed to state the value(s) this rule encodes.
 # "Section 2 in The Income Tax Act, 1961" — contains clause (42A). CAVEAT: this
 # mirror pre-dates Finance (No.2) Act 2024 (base definition still reads "36
-# months"; the 2014 date-conditional proviso is unchanged). It DOES corroborate
-# holding.listed_equity.lt_months=12 (first proviso: units of an equity-oriented
-# fund / UTI / zero-coupon bond / other listed non-unit securities -> 12 months)
-# and holding.other.lt_months=24 (third proviso: unlisted shares / immovable
-# property -> 24 months). It does NOT corroborate holding.listed_nonequity's
-# 12-month value or its acquisition-date condition — that reclassification of
-# listed non-equity units (e.g. gold ETFs) is a Finance (No.2) Act 2024 change
-# not present on this page. Left as the least-bad available deep primary
-# because it is still on-point for two of the three holding.* rules and is not
-# a search URL; the listed_nonequity gap is called out in the report for the
-# controller to adjudicate (a fresher primary should be sourced later).
+# months"; the 2014 date-conditional proviso is unchanged). It still corroborates
+# holding.listed_equity.lt_months=12 (first proviso: listed securities / equity-
+# oriented-fund / UTI units / zero-coupon bond -> 12 months) — the limb the 2024
+# amendment left at 12 months — and is this rule's deep, non-search primary. The
+# other two holding.* rules now cite the FA (No. 2) Act 2024 eGazette directly:
+# holding.other.lt_months=24 (opening portion, s.3(b)(i): "36 months" -> "24
+# months") and holding.listed_nonequity.lt_months=12 (first proviso, s.3(b)(ii):
+# "(other than a unit)" deleted) — neither change is present on this page.
 _IK_2_42A = "https://indiankanoon.org/doc/545792/"
 # Gold/listed-non-equity holding period. Finance (No. 2) Act, 2024, s.3(b)
 # (eGazette) amends s.2(42A) with retrospective effect from 23-Jul-2024:
@@ -34,11 +31,10 @@ _IK_2_42A = "https://indiankanoon.org/doc/545792/"
 # s.21(b) substitutes the s.50AA "specified mutual fund" definition (w.e.f.
 # 1-Apr-2026 / AY 2026-27) to >65% debt and qualifying FoFs — gold/silver ETFs
 # exit the always-STCG deeming for this AY and take the ordinary holding test.
-# Primary: eGazette FA (No. 2) 2024 PDF. Secondary: Taxmann / ClearTax notes
+# Primary: eGazette FA (No. 2) 2024 PDF. Secondary: Taxmann note
 # (no acquisition-date grandfathering for the 12-month listed-unit limb).
 _EGAZETTE_FA_NO2_2024 = "https://egazette.gov.in/WriteReadData/2024/256436.pdf"
 _TAXMANN_CG_FA2024 = "https://www.taxmann.com/post/blog/key-amendments-to-capital-gains-provisions-under-the-finance-no-2-act"
-_CLEARTAX_GOLD_ETF = "https://cleartax.in/s/gold-etfs-vs-mutual-funds-taxation-guide"
 _TAXGURU_50AA_FA2024 = "https://taxguru.in/income-tax/amendment-specified-mutual-fund-definition-section-50aa-budget-2024.html"
 # "Section 24 in The Finance Act, 2023" — the enacting provision that inserts
 # s.50AA into the Income-tax Act; contains "Specified Mutual Fund" and the
@@ -185,9 +181,14 @@ TABLE = RuleTable([
          source_primary=_EGAZETTE_FA_NO2_2024, source_secondary=_TAXMANN_CG_FA2024,
          effective_from=date(2024, 7, 23), effective_to=None, confidence="settled"),
     Rule(key="holding.other.lt_months", value=24,
-         authority="s.2(42A) — other capital assets",
-         source_primary=_IK_2_42A, source_secondary=_QUICKO_HP,
-         effective_from=date(2025, 4, 1), effective_to=None, confidence="settled"),
+         authority="s.2(42A) opening portion as amended by Finance (No. 2) Act, 2024, "
+                   "s.3(b)(i) — 'thirty-six months' -> 'twenty-four months', w.e.f. "
+                   "23-Jul-2024 (the same amendment whose first-proviso limb sets the "
+                   "12-month listed threshold). 24-month long-term threshold for capital "
+                   "assets outside the 12-month listed limb (unlisted shares, immovable "
+                   "property, physical gold, etc.)",
+         source_primary=_EGAZETTE_FA_NO2_2024, source_secondary=_QUICKO_HP,
+         effective_from=date(2024, 7, 23), effective_to=None, confidence="settled"),
     Rule(key="s50aa.acquired_from", value=date(2023, 4, 1),
          authority="s.50AA — specified mutual fund; units acquired on/after 1-Apr-2023",
          source_primary=_IK_50AA, source_secondary=_CLEARTAX_50AA,
