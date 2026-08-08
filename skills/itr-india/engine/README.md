@@ -5,6 +5,11 @@ Deterministic, auditable Indian ITR computation engine for **AY 2026-27**
 verified citation; every gray area is either a **contested-flagged** rule
 (surfaces in traces) or a fail-loud `OutOfScopeError` — never a silent guess.
 
+**Out of scope: HUF.** The rates/rebate logic assumes an individual filer
+(s.87A rebate, senior-citizen slabs) — neither applies to an HUF. Filing for
+an HUF is documented in `references/huf-filing.md` but not wired into this
+engine; don't pass HUF figures through `compute()` as-is.
+
 Pipeline (`compute.compute()` runs all of it):
 
 1. **Scope** (`scope.py`) — refuses what the engine cannot faithfully handle
