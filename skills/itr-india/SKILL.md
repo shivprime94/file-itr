@@ -244,6 +244,11 @@ collect and the limits) is in `references/deductions-old-regime.md`.
 
 Pick the simplest form that legally fits. Ask what applies; don't assume.
 
+**First confirm who the filer is.** Everything below assumes an individual
+filer. If the return is for an **HUF** (Hindu Undivided Family), read
+`references/huf-filing.md` first — no 87A rebate, no 80CCD(2), no senior
+slabs, and clubbing/partition rules apply that don't exist for an individual.
+
 - **ITR-1 (Sahaj), AY 2026-27:** resident individual, total income ≤ ₹50L,
   salary/pension + up to two house properties + permitted other sources +
   agricultural income ≤ ₹5k. Aggregate LTCG u/s 112A up to ₹1.25L is permitted;
@@ -407,3 +412,6 @@ challan and source documents.
   comes from a false premise rather than a real provision (salary-as-consulting,
   AIS omission, HRA to a non-genuine landlord, capital-gains date rounding,
   undocumented 80G), what to check, and when to flag versus hold the line.
+- `references/huf-filing.md` — filing for a Hindu Undivided Family: no 87A
+  rebate, no 80CCD(2)/employer NPS, no senior slabs, s.64(2) clubbing for
+  property converted into HUF, s.171 partition traps, ITR-2/3/4 selection.
