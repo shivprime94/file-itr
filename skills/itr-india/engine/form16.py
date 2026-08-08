@@ -134,7 +134,7 @@ def analyze_employment(
     expected = len(employers)
     received = len(form16_records or [])
     changed = expected > 1
-    concurrent = len(clipped) > len(employers) or _has_overlap(clipped)
+    concurrent = _has_overlap(clipped)
 
     return EmploymentAnalysis(
         ay=ay,
@@ -331,6 +331,15 @@ def aggregate_form16s(records: list[Form16Record], *, regime: Regime) -> Form16A
     ex = sum((r.section_10_exemptions for r in records), Decimal("0"))
     pt = sum((r.professional_tax for r in records), Decimal("0"))
     tds = sum((r.tds_192 for r in records), Decimal("0"))
+
+    if regime is Regime.NEW and (ex > 0 or pt > 0):
+        raise ValueError(
+            "section_10_exemptions/professional_tax supplied under new regime — "
+            "most u/s 10 exemptions (HRA, LTA) and professional tax u/s 16(iii) are "
+            "disallowed under s.115BAC(1A); confirm which figures survive (e.g. "
+            "s.10(10)/s.10(10AA) limits, s.10(32)) before including them, then pass "
+            "only the surviving amount"
+        )
 
     gross = g1 + g2 + g3
     before_std = gross - ex - pt

@@ -65,6 +65,16 @@ def test_reconcile_labels_mismatch():
     assert any("missing for employer" in w for w in warnings)
 
 
+def test_rejoin_same_employer_not_flagged_concurrent():
+    stints = [
+        EmploymentStint("A", date(2025, 4, 1), date(2025, 6, 30)),
+        EmploymentStint("B", date(2025, 7, 1), date(2025, 9, 30)),
+        EmploymentStint("A", date(2025, 10, 1), date(2026, 3, 31)),
+    ]
+    analysis = analyze_employment(stints, ay=2027)
+    assert not analysis.concurrent_employers
+
+
 def test_concurrent_employers():
     stints = [
         EmploymentStint("Main", date(2025, 4, 1), date(2026, 3, 31)),
