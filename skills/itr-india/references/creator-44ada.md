@@ -29,6 +29,16 @@ small/medium creator.
 profession income, even though 44AD's 6% would show a lower number — don't pick a
 section just because its percentage is smaller; pick the one that legally fits.
 
+**Not every 194J/194C receipt is professional income.** s.15 charges salary
+income based on the employer-employee relationship, not the TDS section the
+payer used. If the employment-history interview already surfaced a single
+payer, a fixed monthly amount, and employer-like language, but 26AS shows
+194J/194C instead of 192 — check whether it's genuinely a professional
+engagement (written contract, payer doesn't fix hours/method, not the person's
+only client, they could substitute someone else) or disguised employment. If
+the facts say employment, that's salary income, not 44ADA-eligible — see
+`truthful-filing-safeguards.md`.
+
 ## Building gross receipts
 
 Gross receipts = every rupee earned from the activity in the FY:

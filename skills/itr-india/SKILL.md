@@ -200,6 +200,17 @@ forward-looking "you should go buy X to save more next year" advice stays out of
 scope (not financial-adviser territory) — but for *this* return, leave nothing
 legitimate unclaimed.
 
+**Minimise legally, not by mis-stating a fact.** A small number of requests ask
+for a lower number through a false premise instead of a real provision — salary
+relabelled as consulting, an AIS/26AS entry left off, HRA to a landlord with no
+real payment trail, a capital-gains holding period rounded the way that helps,
+an undocumented donation. These have genuine versions too, so the default is to
+ask the clarifying question and check the source document, not to refuse
+outright — see `references/truthful-filing-safeguards.md` for the specific
+patterns, what to check, and where the line is closer to hard (an AIS entry, a
+holding-period date) versus a judgment call worth walking through with the
+user.
+
 ## Choosing the regime (do the comparison, don't guess)
 
 The **new regime (Section 115BAC) is the default** since FY 2023-24. It has wider
@@ -392,3 +403,7 @@ challan and source documents.
   timely-return gate.
 - `references/portal-workflow.md` — step-by-step portal navigation, every known
   quirk with its workaround, and the validation-defect catalogue.
+- `references/truthful-filing-safeguards.md` — patterns where a lower number
+  comes from a false premise rather than a real provision (salary-as-consulting,
+  AIS omission, HRA to a non-genuine landlord, capital-gains date rounding,
+  undocumented 80G), what to check, and when to flag versus hold the line.
