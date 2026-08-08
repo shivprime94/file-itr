@@ -17,6 +17,13 @@ Per scrip: sale value − cost of acquisition = gain; record buy/sell dates (for
 holding period) and confirm STT was paid (makes it 111A/112A rather than the
 slab/other rate). Cross-check the sale proceeds against the bank credit.
 
+**Classify the holding period from the broker statement's dates only** — never
+from what the user would prefer it to be. If a transfer is a day short of the
+threshold, it's short-term; don't round it. The rate and exemption differ enough
+(111A/112A vs slab, ₹1.25L exemption) that this is the one line on the return
+where the classification is a fact from the document, not a judgment call — see
+`truthful-filing-safeguards.md`.
+
 ### Equity-oriented or not? Let the AIS decide
 
 The single most consequential classification call for mutual-fund gains is
