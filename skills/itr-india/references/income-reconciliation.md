@@ -28,7 +28,9 @@ double-count (e.g., the same payout seen by two reporters).
 
 **Salary:** Sum gross 17(1) across all Form 16s = total gross salary. Confirm
 each against the 26AS salary (192) entries. Subtract the single ₹75,000 standard
-deduction (new regime). The result is income chargeable under "Salaries". If the
+deduction (new regime). The result is income chargeable under "Salaries". For a
+full checklist (Part B fields, Schedule S rows, HRA across employers, optional
+`engine/form16.py` helper), read `multiple-form-16.md`. If the
 employee had more than one employer in the year, the later employer's own TDS
 computation often aggregates the earlier employer's income for its own
 withholding — but may use the earlier employer's **gross** figure rather than
@@ -102,6 +104,12 @@ back to a document. If a number can't be sourced, stop and find the source.
 - **AIS shows income you can't trace:** ask the user; it may be a duplicate, a
   joint-account entry, or genuinely theirs. Don't silently drop it.
 - **Income you have but AIS doesn't:** declare it anyway (see SKILL.md).
+- **An AIS/26AS entry the user wants left off:** don't drop it. Every AIS/26AS
+  entry must end up on the return **or** be explained as a duplicate/error you
+  can point to (joint-account entry, someone else's transaction, a reporting
+  mistake worth disputing on the AIS portal) — a documented entry left out
+  without that explanation is under-reporting against a known fact, not a
+  classification judgment. See `truthful-filing-safeguards.md`.
 - **TDS in 26AS but no matching income:** find the income — TDS implies a
   payment was made to the PAN.
 - **Foreign-platform money received in INR in India:** generally Indian-source

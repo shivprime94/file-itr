@@ -5,7 +5,8 @@ description: >-
   Return (ITR-1/2/3/4) on the e-filing portal (eportal.incometax.gov.in), under
   EITHER the old or new tax regime (non-resident / RNOR returns are out of
   scope). Use WHENEVER the user mentions filing taxes in India,
-  ITR, income tax return, 26AS, AIS, Form 16, old vs new regime, 115BAC, Form
+  ITR, income tax return, 26AS, AIS, Form 16, employment history, job change,
+  multiple employers, old vs new regime, 115BAC, Form
   10-IEA, 80C/80D/HRA/home-loan/NPS/80G deductions, 44ADA/44AD presumptive,
   self-assessment/advance tax/234B/234C, TDS reconciliation, capital gains on
   Indian shares/mutual funds/property, or crypto/VDA (115BBH/194S) — even if they
@@ -65,31 +66,91 @@ things that aren't real.
    return (NR/RNOR, DTAA relief, Form 67 foreign tax credit, Schedule FSI/TR) is
    **out of scope** here; the residency call in this step is a gate, not a
    formality.
-2. **Gather every income document and every deduction proof.** Form 16(s), Form
-   26AS, AIS/TIS, bank statements, broker/capital-gains statements, platform
-   payout files — and, if old regime is in play, 80C/80D/home-loan/HRA/donation
-   proofs.
-3. **Reconcile income to sources.** The heart of the job — see
+2. **Employment history (if any salary).** Before asking for "the Form 16", build
+   an FY timeline — see **Employment history** below and
+   `references/multiple-form-16.md`. Job change, overlapping jobs, or mid-year
+   join/exit → **one Form 16 per employer**; employment **gaps** do not need a
+   Form 16 but may need other income questions.
+3. **Gather every income document and every deduction proof.** Collect the Form
+   16 count implied by step 2, Form 26AS, AIS/TIS, bank statements,
+   broker/capital-gains statements, platform payout files — and, if old regime is
+   in play, 80C/80D/home-loan/HRA/donation proofs.
+4. **Reconcile income to sources.** The heart of the job — see
    `references/income-reconciliation.md`. One number per income head, each tied
    to a document.
-4. **Compare both regimes and choose.** Compute total tax under **both** the old
+5. **Compare both regimes and choose.** Compute total tax under **both** the old
    and new regimes on the actual numbers and pick the lower — subject to the
    Form 10-IEA constraint for business filers. See "Choosing the regime" below
    and `references/tax-regimes-and-slabs.md` + `references/deductions-old-regime.md`.
-5. **Pick the ITR form.** See "Choosing the ITR form" below and
+6. **Pick the ITR form.** See "Choosing the ITR form" below and
    `references/form-selection-ay2026-27.md`.
-6. **Compute total income and tax independently** (a script — see "Verify the
+7. **Compute total income and tax independently** (a script — see "Verify the
    math") *before* trusting the portal, so you catch portal mistakes rather than
    the reverse.
-7. **Fill the portal schedule-by-schedule**, confirming each. See
+8. **Fill the portal schedule-by-schedule**, confirming each. See
    `references/portal-workflow.md` for the quirks that otherwise cost hours.
-8. **Resolve validation defects**, re-validate to zero errors.
-9. **Hand off** payment, submission, and e-verification to the user, with the
-   exact amount and the exact clicks.
-10. **Verify the final preview / JSON** against your independent computation
+9. **Resolve validation defects**, re-validate to zero errors.
+10. **Hand off** payment, submission, and e-verification to the user, with the
+    exact amount and the exact clicks.
+11. **Verify the final preview / JSON** against your independent computation
     before the user submits.
 
 Use a task list and a final verification step — a wrong ITR has real penalties.
+
+## Employment history (ask before Form 16)
+
+Whenever the user mentions **salary, payroll, employer, or Form 16**, ask for
+**FY employment history** before assuming a single document. Users often mention
+only their current employer and forget an earlier stint or a gap month.
+
+**Ask:**
+
+1. How many employers paid you salary in this FY (Apr–Mar)?
+2. For each: employer name (no need for legal entity detail), **from** and **to**
+   dates or months (joining, resignation, last working day).
+3. Any period with **no salary** (between jobs, sabbatical, notice without pay,
+   startup gap)? How long?
+4. During any gap: freelance/consulting receipts, **full-and-final / settlement**
+   from the old employer, or pension?
+5. Any **two jobs at the same time** (main job + part-time on payroll)?
+
+**Then:**
+
+| Situation | Form 16 action |
+|---|---|
+| One employer, full FY | Ask for **one** Form 16 |
+| Job change (sequential employers) | Ask for **one Form 16 per employer** |
+| Two jobs at once | **Two Form 16s** (two TANs / two 192 entries in 26AS) |
+| Mid-year join or exit (single employer) | Still usually **one** Form 16 from that employer for the part-year |
+| Gap with no salary | **No** Form 16 for gap months — confirm no missing employer; ask about other income in the gap |
+
+If they **changed jobs** or had **multiple employers**, explicitly say: *"Please
+upload or paste Part A + Part B from **each** Form 16 — we need all of them, not
+just the latest job."*
+
+Optional engine check (after you have dates + Form 16 count):
+
+```python
+from datetime import date
+from engine.form16 import (
+    EmploymentStint, analyze_employment, employment_prompts,
+    reconcile_form16s_to_employment, Form16Record,
+)
+
+stints = [
+    EmploymentStint("Employer A", date(2025, 4, 1), date(2025, 6, 30)),
+    EmploymentStint("Employer B", date(2025, 8, 1), date(2026, 3, 31)),
+]
+analysis = analyze_employment(stints, ay=2027, form16_records=[...])
+for q in employment_prompts(analysis):
+    print(q)
+print(analysis.render_timeline())
+print(reconcile_form16s_to_employment(analysis, [...]))
+```
+
+Gaps affect **HRA** (rent without HRA component), **80C** (EPF from two jobs),
+and whether **AIS salary** matches only part of the year — not whether a second
+Form 16 exists. See `references/multiple-form-16.md`.
 
 ## Aim: the lowest *legal* tax — claim everything they're entitled to
 
@@ -107,10 +168,11 @@ actively rather than passively accepting whatever the portal pre-fills:
 
 ### Documents / proofs to ask the user for
 
-Always ask for the income documents (Form 16, 26AS, AIS/TIS, bank statements,
-broker statement, platform payouts). Then, to reduce tax, **ask specifically
-whether they have any of these** (each can lower taxable income under the old
-regime — see `references/deductions-old-regime.md`):
+Always ask for the income documents after **employment history** (see above):
+**all Form 16s** matching every employer in the FY, 26AS, AIS/TIS, bank statements,
+broker statement, platform payouts). Then, to reduce tax, **ask specifically whether they have any
+of these** (each can lower taxable income under the old regime — see
+`references/deductions-old-regime.md`):
 
 - **80C (up to ₹1.5L):** EPF/PF statement, PPF passbook, ELSS / mutual-fund tax
   saver, LIC/term-insurance premium receipts, children's school tuition fee
@@ -137,6 +199,17 @@ comparison, and show the user the cheaper outcome with the assumptions listed. T
 forward-looking "you should go buy X to save more next year" advice stays out of
 scope (not financial-adviser territory) — but for *this* return, leave nothing
 legitimate unclaimed.
+
+**Minimise legally, not by mis-stating a fact.** A small number of requests ask
+for a lower number through a false premise instead of a real provision — salary
+relabelled as consulting, an AIS/26AS entry left off, HRA to a landlord with no
+real payment trail, a capital-gains holding period rounded the way that helps,
+an undocumented donation. These have genuine versions too, so the default is to
+ask the clarifying question and check the source document, not to refuse
+outright — see `references/truthful-filing-safeguards.md` for the specific
+patterns, what to check, and where the line is closer to hard (an AIS entry, a
+holding-period date) versus a judgment call worth walking through with the
+user.
 
 ## Choosing the regime (do the comparison, don't guess)
 
@@ -313,6 +386,9 @@ challan and source documents.
   and what proof to collect.
 - `references/income-reconciliation.md` — tying each income head to 26AS / AIS /
   bank statements / payout files, and handling mismatches.
+- `references/multiple-form-16.md` — employment history, gaps, job change /
+  concurrent employers: per-employer extraction, reconciliation table, TDS
+  pitfalls, Schedule S portal rows, optional `engine/form16.py` helpers.
 - `references/creator-44ada.md` — presumptive taxation for creators/freelancers
   /small business (44ADA vs 44AD), CBDT business codes, gross-receipts build,
   BP schedule, the no-account balance sheet.
@@ -327,3 +403,7 @@ challan and source documents.
   timely-return gate.
 - `references/portal-workflow.md` — step-by-step portal navigation, every known
   quirk with its workaround, and the validation-defect catalogue.
+- `references/truthful-filing-safeguards.md` — patterns where a lower number
+  comes from a false premise rather than a real provision (salary-as-consulting,
+  AIS omission, HRA to a non-genuine landlord, capital-gains date rounding,
+  undocumented 80G), what to check, and when to flag versus hold the line.
