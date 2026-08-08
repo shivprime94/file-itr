@@ -222,10 +222,18 @@ class Form16Record:
     employment_to: Optional[date] = None
     # NPS verification: employer contribution to NPS per Form 16 Part B (if itemized).
     employer_nps_contribution: Decimal = Decimal("0")
+    # Section 17(2)(vii) aggregate ceiling: employer's EPF deduction u/s 16.
+    employer_epf_deduction: Decimal = Decimal("0")
+    # Section 17(2)(vii) aggregate ceiling: employer's superannuation contribution.
+    employer_superannuation_contribution: Decimal = Decimal("0")
     # Basic salary (or None if only gross available — caller infers from gross).
     basic_salary: Optional[Decimal] = None
+    # Employee type: "government" or "non-government" (affects 80CCD(2) limits).
+    employee_type: str = "non-government"
 
     def __post_init__(self):
+        if self.employee_type not in ("government", "non-government"):
+            raise ValueError(f"employee_type must be 'government' or 'non-government', got {self.employee_type!r}")
         for name, val in (
             ("gross_17_1", self.gross_17_1),
             ("perquisites_17_2", self.perquisites_17_2),
@@ -234,6 +242,8 @@ class Form16Record:
             ("professional_tax", self.professional_tax),
             ("tds_192", self.tds_192),
             ("employer_nps_contribution", self.employer_nps_contribution),
+            ("employer_epf_deduction", self.employer_epf_deduction),
+            ("employer_superannuation_contribution", self.employer_superannuation_contribution),
         ):
             if val < 0:
                 raise ValueError(f"{name} cannot be negative")
@@ -419,6 +429,138 @@ def verify_nps_contributions(records: list[Form16Record],
             limit_pct=limit_pct_decimal,
             compliant=compliant,
             warning=warning_msg,
+        ))
+
+    return flags
+
+
+@dataclass(frozen=True)
+class EmployerContributionCeilingFlag:
+    """Section 17(2)(vii) aggregate check: EPF + NPS + superannuation ≤ ₹7.5L."""
+
+    total_employer_contributions: Decimal  # Sum of EPF, NPS, superannuation.
+    epf_portion: Decimal
+    nps_portion: Decimal
+    superannuation_portion: Decimal
+    ceiling: Decimal = Decimal("750000")
+    excess: Decimal = Decimal("0")  # Taxable as perquisite if > 0.
+    compliant: bool = True
+    warning: str = ""
+
+
+def verify_employer_contribution_ceiling(records: list[Form16Record]) -> EmployerContributionCeilingFlag:
+    """Check section 17(2)(vii) aggregate employer contributions across all Form 16s.
+
+    Section 17(2)(vii): sum of employer's EPF deduction, NPS contribution, and
+    superannuation contribution must not exceed ₹7.5L per financial year.
+    Excess becomes a taxable perquisite (and annual returns on excess also taxed).
+
+    Args:
+        records: List of Form16Records with employer_epf_deduction, employer_nps_contribution,
+                 employer_superannuation_contribution.
+
+    Returns:
+        EmployerContributionCeilingFlag with total, breakdown, excess (if any).
+    """
+    total_epf = sum((r.employer_epf_deduction for r in records), Decimal("0"))
+    total_nps = sum((r.employer_nps_contribution for r in records), Decimal("0"))
+    total_sa = sum((r.employer_superannuation_contribution for r in records), Decimal("0"))
+    total = total_epf + total_nps + total_sa
+    ceiling = Decimal("750000")
+    excess = max(total - ceiling, Decimal("0"))
+    compliant = excess == Decimal("0")
+
+    warning = ""
+    if excess > Decimal("0"):
+        warning = (
+            f"⚠ Employer contributions aggregate ₹{total} — exceeds ₹{ceiling} ceiling "
+            f"(Section 17(2)(vii)). Breakdown: EPF ₹{total_epf} + NPS ₹{total_nps} + "
+            f"Superannuation ₹{total_sa}. Excess ₹{excess} is **taxable as perquisite** in Form 16 Part B "
+            f"(check 'other perquisites' / perquisites_17_2). Annual returns on excess also taxed. "
+            f"Verify with employer / payroll for amended Form 16."
+        )
+
+    return EmployerContributionCeilingFlag(
+        total_employer_contributions=total,
+        epf_portion=total_epf,
+        nps_portion=total_nps,
+        superannuation_portion=total_sa,
+        ceiling=ceiling,
+        excess=excess,
+        compliant=compliant,
+        warning=warning,
+    )
+
+
+@dataclass(frozen=True)
+class NpsRegimeEligibilityFlag:
+    """80CCD(2) regime eligibility and limit verification."""
+
+    employer_label: str
+    employee_type: str  # "government" or "non-government"
+    new_regime: bool
+    applicable_limit_pct: Decimal  # 14% or 10%
+    rule_citation: str  # e.g., "Section 80CCD(2), Finance Act 2024 Proviso (AY 2026-27+)"
+    warning: str = ""
+
+
+def verify_80ccd2_regime_eligibility(records: list[Form16Record],
+                                    *,
+                                    ay: int = 2027,
+                                    new_regime: bool = False) -> list[NpsRegimeEligibilityFlag]:
+    """Verify 80CCD(2) regime and employee-type alignment.
+
+    Rules (Section 80CCD(2)):
+    - Government employee: 14% always (whether old or new regime — no change in regime affects this).
+    - Non-government, old regime: 10% (pre-Finance Act 2024, any AY).
+    - Non-government, new regime (115BAC(1A)): 14% (Finance Act 2024 Proviso, AY 2026-27 onwards).
+
+    This function flags regime mismatches and documents applicable limits per employee type.
+
+    Args:
+        records: List of Form16Records with employee_type.
+        ay: Assessment year (determines whether new-regime 14% cap applies).
+        new_regime: If True, taxpayer is filing under 115BAC(1A).
+
+    Returns:
+        List of NpsRegimeEligibilityFlag per employer.
+    """
+    flags: list[NpsRegimeEligibilityFlag] = []
+
+    for rec in records:
+        is_govt = rec.employee_type == "government"
+
+        if is_govt:
+            limit_pct = Decimal("14")
+            citation = "Section 80CCD(2)(a) — government employee, always 14%"
+            warning = ""
+        elif new_regime and ay >= 2026:
+            limit_pct = Decimal("14")
+            citation = (
+                "Section 80CCD(2)(b) Proviso (Finance (No. 2) Act, 2024); "
+                "AY 2026-27+ under 115BAC(1A): non-government employee, 14% (increased from 10%)"
+            )
+            warning = (
+                f"{rec.employer_label}: New regime (115BAC(1A)) — NPS limit raised to 14% "
+                f"(AY {ay}). If switching regimes, recalculate TDS impact."
+            )
+        else:
+            limit_pct = Decimal("10")
+            citation = f"Section 80CCD(2)(b) — old regime, non-government employee, 10%"
+            warning = (
+                f"{rec.employer_label}: Old regime — NPS limit capped at 10%. "
+                f"Consider new regime (115BAC(1A)) for AY 2026-27+ to access 14% limit."
+                if ay >= 2026
+                else ""
+            )
+
+        flags.append(NpsRegimeEligibilityFlag(
+            employer_label=rec.employer_label,
+            employee_type=rec.employee_type,
+            new_regime=new_regime,
+            applicable_limit_pct=limit_pct,
+            rule_citation=citation,
+            warning=warning,
         ))
 
     return flags

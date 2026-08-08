@@ -194,3 +194,133 @@ def test_nps_inferred_basic_when_missing():
     assert flags[0].basic_salary_used == Decimal("650000")
     assert flags[0].compliant  # 65000 is ~10% of 650000
     assert "assumed 65%" in flags[0].warning
+
+
+def test_employer_contribution_ceiling_compliant():
+    from engine.form16 import verify_employer_contribution_ceiling
+    records = [
+        Form16Record(
+            "Employer A",
+            gross_17_1=Decimal("1000000"),
+            employer_epf_deduction=Decimal("250000"),
+            employer_nps_contribution=Decimal("250000"),
+            employer_superannuation_contribution=Decimal("200000"),
+        ),
+    ]
+    flag = verify_employer_contribution_ceiling(records)
+    assert flag.total_employer_contributions == Decimal("700000")
+    assert flag.excess == Decimal("0")
+    assert flag.compliant
+
+
+def test_employer_contribution_ceiling_exceeded():
+    from engine.form16 import verify_employer_contribution_ceiling
+    records = [
+        Form16Record(
+            "Employer A",
+            gross_17_1=Decimal("2000000"),
+            employer_epf_deduction=Decimal("400000"),
+            employer_nps_contribution=Decimal("300000"),
+            employer_superannuation_contribution=Decimal("100000"),
+        ),
+    ]
+    flag = verify_employer_contribution_ceiling(records)
+    assert flag.total_employer_contributions == Decimal("800000")
+    assert flag.excess == Decimal("50000")
+    assert not flag.compliant
+    assert "taxable as perquisite" in flag.warning.lower()
+
+
+def test_employer_contribution_ceiling_multi_employer():
+    from engine.form16 import verify_employer_contribution_ceiling
+    records = [
+        Form16Record(
+            "Employer A",
+            gross_17_1=Decimal("1000000"),
+            employer_epf_deduction=Decimal("200000"),
+            employer_nps_contribution=Decimal("100000"),
+        ),
+        Form16Record(
+            "Employer B",
+            gross_17_1=Decimal("900000"),
+            employer_epf_deduction=Decimal("150000"),
+            employer_nps_contribution=Decimal("150000"),
+            employer_superannuation_contribution=Decimal("200000"),
+        ),
+    ]
+    flag = verify_employer_contribution_ceiling(records)
+    # Total: 200k + 100k + 150k + 150k + 200k = 800k (excess 50k)
+    assert flag.total_employer_contributions == Decimal("800000")
+    assert flag.epf_portion == Decimal("350000")
+    assert flag.nps_portion == Decimal("250000")
+    assert flag.superannuation_portion == Decimal("200000")
+    assert flag.excess == Decimal("50000")
+
+
+def test_80ccd2_government_employee():
+    from engine.form16 import verify_80ccd2_regime_eligibility
+    records = [
+        Form16Record(
+            "Ministry A",
+            gross_17_1=Decimal("800000"),
+            basic_salary=Decimal("500000"),
+            employer_nps_contribution=Decimal("70000"),
+            employee_type="government",
+        ),
+    ]
+    flags = verify_80ccd2_regime_eligibility(records, ay=2027, new_regime=False)
+    assert len(flags) == 1
+    assert flags[0].applicable_limit_pct == Decimal("14")
+    assert "government employee, always 14%" in flags[0].rule_citation
+
+
+def test_80ccd2_non_government_old_regime():
+    from engine.form16 import verify_80ccd2_regime_eligibility
+    records = [
+        Form16Record(
+            "Private Corp",
+            gross_17_1=Decimal("1000000"),
+            basic_salary=Decimal("700000"),
+            employer_nps_contribution=Decimal("70000"),
+            employee_type="non-government",
+        ),
+    ]
+    flags = verify_80ccd2_regime_eligibility(records, ay=2027, new_regime=False)
+    assert len(flags) == 1
+    assert flags[0].applicable_limit_pct == Decimal("10")
+    assert "old regime" in flags[0].rule_citation.lower()
+
+
+def test_80ccd2_non_government_new_regime_ay2026_plus():
+    from engine.form16 import verify_80ccd2_regime_eligibility
+    records = [
+        Form16Record(
+            "Tech Corp",
+            gross_17_1=Decimal("1500000"),
+            basic_salary=Decimal("1000000"),
+            employer_nps_contribution=Decimal("140000"),
+            employee_type="non-government",
+        ),
+    ]
+    flags = verify_80ccd2_regime_eligibility(records, ay=2026, new_regime=True)
+    assert len(flags) == 1
+    assert flags[0].applicable_limit_pct == Decimal("14")
+    assert "115BAC(1A)" in flags[0].rule_citation
+    assert "2024" in flags[0].rule_citation  # Finance Act 2024
+
+
+def test_80ccd2_old_regime_pre_2026():
+    from engine.form16 import verify_80ccd2_regime_eligibility
+    # Before the amendment, even new regime filing should have 10% (no proviso)
+    records = [
+        Form16Record(
+            "Corp",
+            gross_17_1=Decimal("1000000"),
+            basic_salary=Decimal("700000"),
+            employer_nps_contribution=Decimal("70000"),
+            employee_type="non-government",
+        ),
+    ]
+    flags = verify_80ccd2_regime_eligibility(records, ay=2025, new_regime=True)
+    assert len(flags) == 1
+    assert flags[0].applicable_limit_pct == Decimal("10")  # Pre-2026, still 10%
