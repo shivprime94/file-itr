@@ -28,7 +28,9 @@ double-count (e.g., the same payout seen by two reporters).
 
 **Salary:** Sum gross 17(1) across all Form 16s = total gross salary. Confirm
 each against the 26AS salary (192) entries. Subtract the single ₹75,000 standard
-deduction (new regime). The result is income chargeable under "Salaries". If the
+deduction (new regime). The result is income chargeable under "Salaries". For a
+full checklist (Part B fields, Schedule S rows, HRA across employers, optional
+`engine/form16.py` helper), read `multiple-form-16.md`. If the
 employee had more than one employer in the year, the later employer's own TDS
 computation often aggregates the earlier employer's income for its own
 withholding — but may use the earlier employer's **gross** figure rather than

@@ -5,6 +5,11 @@ Deterministic, auditable Indian ITR computation engine for **AY 2026-27**
 verified citation; every gray area is either a **contested-flagged** rule
 (surfaces in traces) or a fail-loud `OutOfScopeError` — never a silent guess.
 
+**Out of scope: HUF.** The rates/rebate logic assumes an individual filer
+(s.87A rebate, senior-citizen slabs) — neither applies to an HUF. Filing for
+an HUF is documented in `references/huf-filing.md` but not wired into this
+engine; don't pass HUF figures through `compute()` as-is.
+
 Pipeline (`compute.compute()` runs all of it):
 
 1. **Scope** (`scope.py`) — refuses what the engine cannot faithfully handle
@@ -49,4 +54,9 @@ is the caller's already-reconciled slab-rate total, excluding dividends —
 pass dividend income separately via `dividend_income` so the 15% surcharge
 cap can reach it (compute.compute()).
 
-Run tests: `pytest skills/itr-india/engine/tests -v` (144 tests)
+`form16.py` — optional helpers: aggregate multiple Form 16 Part B figures;
+`analyze_employment` / `employment_prompts` for FY timelines, job-change Form 16
+count, and employment gaps. Reconciliation only — Chapter VI-A and other heads
+stay with the caller. See `references/multiple-form-16.md`.
+
+Run tests: `pytest skills/itr-india/engine/tests -v`
