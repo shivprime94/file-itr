@@ -26,7 +26,10 @@ limits — they change.
   rest carried forward). Old regime only for self-occupied.
 - **HRA (Section 10(13A)):** exempt = least of (actual HRA; rent − 10% of salary;
   50% of salary in metro / 40% non-metro). Needs rent receipts / landlord PAN if
-  rent > ₹1L/yr. Old regime only.
+  rent > ₹1L/yr. Old regime only. If the landlord is a family member, ask for a
+  real, traceable payment (bank transfer, not cash) and confirm it's a genuine
+  separate-household arrangement, not one constructed for the return — see
+  `truthful-filing-safeguards.md`.
 
 ## Others worth checking
 
@@ -35,7 +38,10 @@ limits — they change.
 - **80E:** full interest on an education loan (no cap), up to 8 years.
 - **80G:** donations — 50% or 100% deductible depending on the institution; some
   subject to a 10%-of-income qualifying limit. Cash donations > ₹2,000 don't
-  qualify. Need the donee's PAN and an 80G receipt.
+  qualify. Need the donee's PAN and an 80G receipt with a valid registration
+  reference — not just a receipt. If any part of the donated amount comes back
+  to the donor, it isn't a donation for tax purposes; see
+  `truthful-filing-safeguards.md`.
 - **80EEB:** interest on an electric-vehicle loan, up to ₹1,50,000.
 - **80DD / 80DDB / 80U:** disability / specified-disease deductions.
 - **80GG:** rent paid when no HRA is received.
