@@ -94,11 +94,11 @@ converse, dressing a genuine long holding as short-term to use a loss
 differently).
 
 **Why it matters:** the LTCG/STCG line is a **fact** — the buy date and sell
-date on the broker statement, compared against the statutory holding period
-(12 months for listed equity/equity MF, 24 months for unlisted shares/property,
-36 months for most other assets pre-Finance-Act-2023 changes) — not a judgment
-call the return can round in either direction. It changes the rate (111A/112A
-vs slab) and the exemption (₹1.25L u/s 112A).
+date on the broker statement, compared against the statutory holding period for
+that asset class (see `capital-gains-other-sources.md` for the current
+holding-period rules; don't re-derive them here) — not a judgment call the
+return can round in either direction. It changes the rate (111A/112A vs slab)
+and the exemption (₹1.25L u/s 112A).
 
 **What to do:** this is the closer of the two hard lines here. Always derive the
 holding-period classification from the broker statement's transaction dates,
