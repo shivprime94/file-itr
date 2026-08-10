@@ -100,6 +100,20 @@ When "Proceed to Verification" runs the **Upload Level Validation**, it lists
 - **Secondary address / employer-nature dropdowns blank.** Set "Nature of
   employer = Others" for non-government salary; fill the secondary address if the
   user has one different from the primary.
+
+## Schedule S — more than one Form 16
+
+When the user has **multiple employers** in the year, Schedule S needs **one
+employer block per Form 16/TAN** — not one combined row.
+
+1. Reconcile on paper first (`references/multiple-form-16.md`).
+2. Add each employer with TAN, 17(1)/17(2)/17(3), and that employer's u/s 10
+   exemptions exactly as on its Form 16.
+3. Apply **standard deduction once** on the salary total (portal usually does this
+   at the schedule level — do not duplicate per row).
+4. Match **each** 26AS section-192 entry to the same TAN in the TDS schedule.
+5. After saving Schedule S, re-confirm Part B-TI and Part B-TTI (silent
+   un-confirmation — see above).
 - **Empty mandatory breakup rows.** Delete blank ₹0 perquisite (17(2)) /
   profit-in-lieu (17(3)) rows that carry blank mandatory dropdowns.
 
