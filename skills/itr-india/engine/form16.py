@@ -387,12 +387,13 @@ def verify_nps_contributions(records: list[Form16Record],
     Rules:
     - Government employee: 14% of (basic + DA per terms of employment).
     - Non-government, old regime: 10% of basic.
-    - Non-government, new regime (115BAC(1A)): 14% of basic (effective FY 2025-26).
+    - Non-government, new regime (115BAC(1A)): 14% of basic (effective FY 2024-25 /
+      AY 2025-26, Finance (No. 2) Act 2024 proviso w.e.f. 1-4-2025).
 
     Args:
         records: List of Form16Records with employer_nps_contribution and optional basic_salary.
         ay: Assessment year (for future-proofing; rule limits may change).
-        is_government_employee: If True, apply 14% limit; else apply 10% (old) or 14% (new, from FY2025-26).
+        is_government_employee: If True, apply 14% limit; else apply 10% (old) or 14% (new, from FY 2024-25).
         new_regime: If True and not govt, apply 14%; else 10%.
 
     Returns:
@@ -509,7 +510,7 @@ class NpsRegimeEligibilityFlag:
     employee_type: str  # "government" or "non-government"
     new_regime: bool
     applicable_limit_pct: Decimal  # 14% or 10%
-    rule_citation: str  # e.g., "Section 80CCD(2), Finance Act 2024 Proviso (AY 2026-27+)"
+    rule_citation: str  # e.g., "Section 80CCD(2), Finance (No. 2) Act 2024 Proviso (AY 2025-26+)"
     warning: str = ""
 
 
@@ -522,7 +523,8 @@ def verify_80ccd2_regime_eligibility(records: list[Form16Record],
     Rules (Section 80CCD(2)):
     - Government employee: 14% always (whether old or new regime — no change in regime affects this).
     - Non-government, old regime: 10% (pre-Finance Act 2024, any AY).
-    - Non-government, new regime (115BAC(1A)): 14% (Finance Act 2024 Proviso, AY 2026-27 onwards).
+    - Non-government, new regime (115BAC(1A)): 14% (Finance (No. 2) Act 2024 Proviso,
+      w.e.f. 1-4-2025 → AY 2025-26 / FY 2024-25 onwards).
 
     This function flags regime mismatches and documents applicable limits per employee type.
 
@@ -546,8 +548,8 @@ def verify_80ccd2_regime_eligibility(records: list[Form16Record],
         elif new_regime and ay >= 2026:
             limit_pct = Decimal("14")
             citation = (
-                "Section 80CCD(2)(b) Proviso (Finance (No. 2) Act, 2024); "
-                "AY 2026-27+ under 115BAC(1A): non-government employee, 14% (increased from 10%)"
+                "Section 80CCD(2)(b) Proviso (Finance (No. 2) Act, 2024, w.e.f. 1-4-2025); "
+                "AY 2025-26+ under 115BAC(1A): non-government employee, 14% (increased from 10%)"
             )
             warning = (
                 f"{rec.employer_label}: New regime (115BAC(1A)) — NPS limit raised to 14% "
@@ -558,7 +560,7 @@ def verify_80ccd2_regime_eligibility(records: list[Form16Record],
             citation = f"Section 80CCD(2)(b) — old regime, non-government employee, 10%"
             warning = (
                 f"{rec.employer_label}: Old regime — NPS limit capped at 10%. "
-                f"Consider new regime (115BAC(1A)) for AY 2026-27+ to access 14% limit."
+                f"Consider new regime (115BAC(1A)) for AY 2025-26+ to access 14% limit."
                 if ay >= 2026
                 else ""
             )
