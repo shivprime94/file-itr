@@ -159,6 +159,22 @@ Form 16(s), Form 26AS, AIS/TIS, bank statements for the financial year, any
 broker/capital-gains statement, and any platform payout files (Stripe/YouTube/
 X/etc.). For the portal steps, you log in yourself and the agent drives the form.
 
+## What people say
+
+From people who used it. Replies are from
+[this X thread](https://x.com/neembu_paani31/status/2082884544185987480):
+
+![PanMan: "It worked pretty well. Filed for myself and wife."](docs/testimonials/panman.png)
+
+![Akshith Bellare: used it alongside a CA and spotted a mismatch the CA had missed](docs/testimonials/akshith-bellare.png)
+
+![Sidharth Rajmohan: "It was pretty helpful, filed my tax with that"](docs/testimonials/sidharth-rajmohan.png)
+
+And a LinkedIn post from Chandan Kumar, who filed a complicated return (large
+tax-free gratuity, dividends from demerged unlisted shares) with the skill:
+
+![Chandan Kumar on LinkedIn: added file-itr as a Claude skill and let Claude file the return via the browser](docs/testimonials/chandan-kumar-linkedin.png)
+
 ## Contributing
 
 Bug reports, corrected reference material, and engine improvements are
