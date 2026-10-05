@@ -180,6 +180,16 @@ X/etc.). For the portal steps, you log in yourself and the agent drives the form
 - [`scripts/`](scripts/) — bundle build tooling.
 - [`.github/workflows/`](.github/workflows/) — CI.
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=shivprime94%2Ffile-itr&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=shivprime94/file-itr&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=shivprime94/file-itr&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=shivprime94/file-itr&type=date&legend=top-left" />
+ </picture>
+</a>
+
 ## Contributing
 
 Bug reports, corrected reference material, and engine improvements are
