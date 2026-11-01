@@ -72,11 +72,12 @@ Presumptive income @ 50% (62ii)   25,000
 - **Part A – Balance Sheet, item 6 (no-account case):** because income is
   declared presumptively with no books, you **must** fill the "no books of
   account" block — sundry debtors, sundry creditors, stock-in-trade, and **cash
-  balance**. Leaving all four at zero triggers a **validation defect** that
-  blocks the return (see `portal-workflow.md`). For a service creator with no
-  inventory: debtors/creditors/stock = 0, and put a sensible positive **cash
-  balance** (the net profit retained is a clean, defensible figure). This is a
-  disclosure field; it does not change the tax.
+  balance**, using the actual year-end business balances. Profit does not
+  establish cash held; drawings, spending, bank deposits and receivables can
+  make them differ. Genuine zero balances must not be replaced with invented
+  positive amounts to pass a validation rule. If validation rejects supported
+  facts, check the current form, applicability and no-books block, save/reopen
+  and investigate the defect (see [portal-workflow.md](portal-workflow.md)).
 
 ## If receipts exceed the presumptive limit, or profit is genuinely below the %
 
