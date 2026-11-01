@@ -1,152 +1,150 @@
-# Driving the e-filing portal (and its quirks)
+# Portal entry, recovery and filing handoff
 
-Portal: `https://eportal.incometax.gov.in`. The return-filing UI is a single-page
-Angular app. It is functional but has several repeatable traps that will waste
-hours if you don't know them. This file is the field guide.
+Portal: <https://eportal.incometax.gov.in>. Use the live UI and the current
+assessment year's official instructions. These observations are fallbacks, not
+permanent screen layouts. Read this before entering or resuming a return.
 
-## Ground rules
+## Before entry
 
-- **The user logs in.** Never handle their password or OTP. Ask them to log in
-  and reach the dashboard, then take over the form-filling.
-- **Two browsers / extension issues:** if more than one browser is connected,
-  ask the user which one to use before acting (don't guess which tab is theirs).
-- **Compute first, then fill.** Have your independent tax number ready so you can
-  catch the portal, not the reverse.
-- **Confirm every schedule**, and after editing any schedule, **re-confirm every
-  schedule downstream of it** — editing an upstream schedule silently flips
-  Part B-TI / Part B-TTI back to "Provide your confirmation".
+- Read [collection-and-coverage.md](collection-and-coverage.md). Batch report
+  downloads while logged in, reconcile locally, then start the next portal batch.
+- Use the user's chosen browser and profile. In-app and Chrome sessions are
+  separate; a connected extension may represent a different profile. Check the
+  intended surface before requesting another login.
+- The user handles passwords and OTPs. Follow the environment's authorization
+  rules for declarations, draft replacement and other consequential actions.
+- Have the computation and source/account inventory ready. Check required bank
+  disclosures early; see [assets-and-bank-disclosures.md](assets-and-bank-disclosures.md).
+- Use supported browser/computer tools and fresh observations. Prefer exact
+  semantic controls. Do not execute arbitrary page-mutation JavaScript, bypass
+  UI validation, or retain indices/coordinates across page updates.
 
-## High-level filing flow
+## Fill and verify persistence
 
-1. e-File → Income Tax Returns → File Income Tax Return → select AY → select
-   "Online" → select ITR-3 (or correct form) → reason for filing.
-2. The portal pre-fills from AIS/26AS. **Verify the pre-fill against your
-   reconciliation** — accept what's right, fix what's wrong, add what's missing.
-3. Go through "Return Summary": open each schedule, fill, **Confirm**.
-4. **Proceed to Verification** → preview → upload-level **Validation**.
-5. Fix any defects, re-validate to **0 errors**.
-6. Hand off: Pay → Submit → e-Verify (all user actions).
+1. Select AY, mode and the supported form; resume the existing draft when
+   continuing. Starting new filing can replace it. Verify its form and preserve
+   useful entries before an authorized replacement.
+2. Reconcile prefill against sources. Prefill or schedule selection does not
+   establish income, correct classification or completeness.
+3. Fill a coherent batch, blur numeric fields, inspect calculated totals and
+   save/confirm immediately. Record the form, schedule and verified save state.
+4. Verify the summary confirmation or reopened values. An accepted import, a
+   clicked Save button and an active countdown do not prove server persistence.
+5. Recheck dependent loss, special-rate and Part B-TI/TTI schedules after edits.
+   Earlier confirmations can silently become stale.
 
-## The quirks, each with its workaround
+Evidence and portal status are separate. A technically confirmed schedule may
+still contain an unresolved estimate. Do not count old-form confirmations as
+new-form saves or call a known material gap final.
 
-**Logout pop-up on navigation.** Navigating by URL throws "Are you sure you want
-to Logout?". Click **No** to stay. (Breadcrumb links usually navigate without the
-pop-up — prefer them.)
+### Recovery and input issues
 
-**Coordinate clicks land on the wrong row.** The page scroll position shifts
-between the screenshot and the click, so a click aimed at row Y often hits a
-different row (e.g., aiming at "Part B-TTI / Provide your confirmation"
-repeatedly opened Schedule AMTC instead). **Workaround: click the exact element
-via DOM/JS, not coordinates.** Find the row's container (each schedule is an
-`<li class="list-group-item">`), then click its confirmation/label element
-directly. Example:
+| Observation | Response and verification |
+|---|---|
+| Unauthorized despite an active countdown | Stop entry, preserve controls, ask the user to log in, resume and inspect saved values before repeating work. |
+| Resume lands on schedule selection/questions | Inspect retained selections and use the visible route to keep existing answers. Do not blindly redo a questionnaire that can change applicability. |
+| Navigation triggers a logout warning | Prefer breadcrumbs and Back to Summary. Distinguish browser Back from the page's Back; handle the actual visible warning. |
+| Dropdown click has no effect | Inspect the opened list; use its actual option or supported keyboard selection. Verify the selected value. |
+| Old zero remains or setting a value clears the field | Select the existing text, replace, blur and read it back. Visible triple-click selection is a fallback after bringing the field into view. |
+| Wide timing table scrolls when focus changes | Focus/scroll to the cell, observe again, then edit. Verify the whole row: an incorrect period can preserve the annual total. |
+| Save appears unchanged immediately | Observe the settled page before retrying; repeated clicks can duplicate rows. |
+| Irrelevant schedule has mandatory blanks | Recheck applicability and remove it through supported controls. Do not fabricate identifiers to satisfy it. |
 
-```js
-// Confirm Part B-TTI reliably:
-const li = [...document.querySelectorAll('li.list-group-item')]
-  .find(x => /Tax Liability on Total Income/.test(x.textContent)
-          && /Provide your confirmation/.test(x.textContent));
-(li.querySelector('p.provide_confirm_label') || li).click();
-```
+## Schedule 112A CSV imports
 
-Also dismiss the logout modal via JS when it blocks:
-`[...document.querySelectorAll('button,span,div')].find(b=>b.textContent.trim()==='No')?.click();`
+Download the current official template and instructions. Verify acquisition
+codes, column count, quoting, precision, mandatory fields and name restrictions.
+The [Department CSV instructions](https://static.incometax.gov.in/iec/foservices/assets/itr-shared/documents/112A_115AD_CSV_Instructions.pdf)
+are a starting point; check applicability to the active AY/importer.
 
-**mat-select dropdowns ignore clicks.** The Angular Material dropdowns (nature of
-employer, business code, etc.) often don't register a coordinate click on an
-option. **Workaround:** focus the control, then use keyboard — `ArrowDown` to the
-option, `Return` to select; or scroll the option list and click the option text.
+Some versions rejected an extra trailing empty template column or treated quoted
+data literally. Diagnose the actual error with a minimal synthetic example;
+do not universally strip columns or quotes from future templates. Record the
+version/context with any workaround.
 
-**Trailing-zero typing bug.** Amount fields are pre-filled with `0`. Typing
-`22930` into them yields `229300` (the old 0 sticks). **Workaround:**
-triple-click the field (and/or Ctrl+A, Delete) to clear it *before* typing.
+Retain source lots even if consolidation is permitted. Verify grandfathering and
+effective-cost calculations survive aggregation. Compare accepted rows and gain
+totals; explain portal rounding separately from source-exact amounts. Confirm
+and verify persistence: an import may not survive a subsequent Unauthorized.
 
-**Schedules silently un-confirm.** Editing Part A-BS, Salary, etc. flips
-Part B-TI/Part B-TTI back to unconfirmed. After any edit, walk back down and
-re-confirm. Part B-TTI confirmation also routes through Schedule AMT/AMTC
-recompute — confirm AMTC if asked, then confirm Part B-TTI.
+## Validation defects without invented facts
 
-**Auto-added schedules with mandatory blanks.** The portal may auto-add ESOP /
-other schedules with mandatory fields (PAN/DPIIT) that don't apply. Remove them
-via "Select Schedule" if not applicable; use "Skip Questions" to stop the
-questionnaire from re-adding them and from resetting answers like
-"income from business = Yes".
+- **No-books balance sheet incomplete:** enter actual year-end business debtors,
+  creditors, stock and cash. Profit is not cash; personal bank/investment assets
+  do not automatically belong here. Never invent positive cash to pass a rule.
+  If genuine zero balances fail, check applicability, required fields, the
+  current form/schema and saved state. Preserve the facts and investigate or
+  escalate the defect. See the no-books block in the
+  [notified ITR-3, AY 2026-27](https://www.incometax.gov.in/iec/foportal/sites/default/files/2026-04/Notification_No_47_2026.pdf);
+  recheck the actual form in other years.
+- **Presumptive business code missing:** some versions hide description/code
+  behind Add Another in the presumptive block, even for a single business.
+  Inspect that subform, fill applicable fields, save and verify income did not
+  duplicate. See [creator-44ada.md](creator-44ada.md).
+- **Employer nature/address blanks:** use the actual employer category and
+  communication address. Remove genuinely empty optional salary-breakup rows
+  rather than inventing a perquisite. See [multiple-form-16.md](multiple-form-16.md)
+  for per-employer/TAN entry and one annual standard deduction.
 
-**Session timeout.** Long sessions log out mid-fill. The user re-logs in and
-clicks "Resume Filing"; confirm the in-progress data survived.
+## Declaration, validation and exported-return review
 
-## The validation-defect catalogue (and fixes)
+The order and labels can vary. Identify each actual stage:
 
-When "Proceed to Verification" runs the **Upload Level Validation**, it lists
-"Category of Defect A" errors that *block* upload. The common ones:
+1. Applicable schedules saved and confirmations current.
+2. Declaration reviewed and authorized as required. Do not affirm completeness
+   while a known material gap remains.
+3. Internal validation passed, with its actual result recorded.
+4. Exported JSON/PDF reviewed for completeness and arithmetic.
+5. Any separate upload-level validation passed after corrections.
+6. Payment credit checked, return regenerated/revalidated, then user-only
+   submission and e-verification.
 
-- **"Income under section 44AD/44ADA/44AE is greater than zero → fill Sl.No 6 of
-  Part-A BS."** The presumptive no-account balance sheet (item 6) is empty.
-  **Fix:** open Part A – Balance Sheet → expand item 6 (no books of account) →
-  enter a positive **cash balance** (debtors/creditors/stock can be 0) → Confirm.
-  A clean, defensible cash-balance figure is the net presumptive profit. This is
-  disclosure only and does not change the tax.
-- **"Kindly enter the respective business code for the income declared u/s
-  44ADA/44AD."** The Name of Business/Profession, Business Code, and Description
-  fields aren't shown by default on the presumptive-income screen — they sit in
-  a sub-form that only appears after clicking **"Add Another"** under the
-  44AD/44ADA/44AE computation block, which reads like "register a second
-  business" rather than "the required field is hidden here." **Fix:** click
-  **Add Another** even when there is only one business/profession, fill Name,
-  Business Code (see `creator-44ada.md` for the code list), and Description,
-  then Save — the presumptive amount is unaffected. Confirmed on ITR-4 (Sugam);
-  check whether the ITR-3 Schedule BP screen has the same pattern before relying
-  on this there.
-- **Secondary address / employer-nature dropdowns blank.** Set "Nature of
-  employer = Others" for non-government salary; fill the secondary address if the
-  user has one different from the primary.
+Internal success does not establish upload-level success. Matching totals do not
+establish that every account, receipt or required disclosure is present. Compare:
 
-## Schedule S — more than one Form 16
+- form, AY, regime/election, residency, addresses and verification details;
+- employer rows, income by head, setoffs, carry-forwards and gain/dividend timing;
+- normal/special-rate tax, surcharge, cess, applicable interest and fees;
+- payer-level TDS deducted/claimed and income-head tags, not just the total;
+- required bank accounts/refund selection independently of AL asset totals;
+- held-asset costs, related liabilities, exempt income and relevant flags;
+- current-AY credits and payable/refund against the independent computation.
 
-When the user has **multiple employers** in the year, Schedule S needs **one
-employer block per Form 16/TAN** — not one combined row.
+Before labeling a download, check completion, form/year and actual content. An
+old tax statement can share a taxpayer/year filename with another report. Keep
+originals private. If supported readers recover a prefixed PDF, verify content
+and render key pages; neither reject every wrapper nor ignore all parser warnings.
 
-1. Reconcile on paper first (`references/multiple-form-16.md`).
-2. Add each employer with TAN, 17(1)/17(2)/17(3), and that employer's u/s 10
-   exemptions exactly as on its Form 16.
-3. Apply **standard deduction once** on the salary total (portal usually does this
-   at the schedule level — do not duplicate per row).
-4. Match **each** 26AS section-192 entry to the same TAN in the TDS schedule.
-5. After saving Schedule S, re-confirm Part B-TI and Part B-TTI (silent
-   un-confirmation — see above).
-- **Empty mandatory breakup rows.** Delete blank ₹0 perquisite (17(2)) /
-  profit-in-lieu (17(3)) rows that carry blank mandatory dropdowns.
+After corrections, regenerate the export and repeat affected checks. JSON records
+what will be filed; it does not prove correct inputs or legal treatment. State
+which review and validation stages actually passed.
 
-After fixing, re-run validation until it reports **0 errors**. The portal will
-then offer **Pay Now / Pay Later**, then the **Complete your Verification**
-screen.
+## Payment preparation and user handoff
 
-## Verifying the final return
+Use the [Department challan manual](https://www.incometax.gov.in/iec/foportal/help/generate-challan-form)
+and the live flow. Verify Act, FY/AY, taxpayer, payment head and existing payments.
+For self-assessment tax the applicable minor head is 300; check the selection
+rather than using the calendar year of payment as the AY.
 
-Before the user submits, read the **PDF preview** (or the downloadable **JSON**)
-and reconcile every key figure against your independent computation:
+Reconcile the balance after credits to tax, surcharge, cess, interest, penalty
+and fee/other fields actually shown. Do not add gross tax to the unpaid balance
+or count TDS twice. A fee is not automatically a penalty; verify current field
+mapping. Make any rounding adjustment explicit and check components sum to the
+return payable. See [Department computation guidance](https://wm.incometaxindia.gov.in/w/computation-of-tax-for-individual-1)
+and [interest guidance](https://incometaxindia.gov.in/Tutorials/6-Interest%20payable%20by%20the%20taxpayer.pdf).
+Recompute for actual payment/filing dates; do not reuse an illustrative amount
+after income, credits, form or dates change.
 
-- total income, income per head;
-- gross tax, cess, special-rate tax;
-- 234B + 234C interest;
-- TDS + self-assessment challan = total taxes paid;
-- each TDS entry's **Head of Income** tag matches the income head it's actually
-  credited against (e.g. 194J TDS feeding presumptive business income should be
-  tagged "Business/Profession," not left on the portal's "Other Sources"
-  default) — this doesn't necessarily block Upload Level Validation, but a
-  mismatched tag misaligns the credit from the income it belongs to;
-- amount payable should be **₹0** after payment (a few-rupee gap is just the
-  nearest-₹10 rounding under Section 288B);
-- regime flag, residential status, bank accounts, foreign-asset flag,
-  verification name/PAN.
+Explain a large balance as tax less credits plus interest/fees. Asset disclosure
+is different from taxable income. State whether the next blocker affects correct
+payment, final filing, or neither; explain any change in readiness.
 
-The downloadable JSON is the authoritative artifact — if it matches your numbers,
-the return is correct. Only then hand off to the user for Pay / Submit / e-Verify.
+The user pays. Selecting a mode, saving a draft or generating a CRN does not prove
+payment. Verify the paid receipt, AY, amount, date and available challan identifiers.
+Check whether it populated the return; otherwise enter the paid challan in the
+applicable tax-paid schedule. Confirm credit, recompute and investigate any
+residual balance instead of dismissing it as rounding. Regenerate and revalidate.
 
-## After payment — recording the challan
-
-When the user pays self-assessment tax, the challan must land in **Schedule IT**
-("Advance Tax and Self Assessment Tax"): BSR code, date of deposit, challan
-serial, amount. If paid via the portal's "Pay Now" it auto-populates; if paid
-separately, add it manually, then confirm Tax Paid. Verify Part B-TTI "Amount
-payable" then reads ₹0.
+The user submits and e-verifies. Retain the acknowledgement/verification outcome
+and a private next-year handover of held costs, taxed receivables, adjustments and
+estimates. Do not report filing from a draft, preview or payment receipt alone.

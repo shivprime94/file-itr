@@ -1,7 +1,7 @@
 ---
 name: itr-india
 description: >-
-  Assist a resident Indian individual with preparing and e-filing an Income Tax
+  Help a resident individual with preparing and e-filing an Income Tax
   Return (ITR-1/2/3/4) on the e-filing portal (eportal.incometax.gov.in), under
   EITHER the old or new tax regime (non-resident / RNOR returns are out of
   scope). Use WHENEVER the user mentions filing taxes in India,
@@ -71,13 +71,20 @@ things that aren't real.
    `references/multiple-form-16.md`. Job change, overlapping jobs, or mid-year
    join/exit → **one Form 16 per employer**; employment **gaps** do not need a
    Form 16 but may need other income questions.
-3. **Gather every income document and every deduction proof.** Collect the Form
+3. **Plan collection and check coverage before portal entry.** Read
+   [collection-and-coverage.md](references/collection-and-coverage.md) for the
+   source/account inventory, report selection and overlap checks. Batch downloads
+   while sessions are active, then reconcile locally. Collect the Form
    16 count implied by step 2, Form 26AS, AIS/TIS, bank statements,
    broker/capital-gains statements, platform payout files — and, if old regime is
    in play, 80C/80D/home-loan/HRA/donation proofs.
 4. **Reconcile income to sources.** The heart of the job — see
    `references/income-reconciliation.md`. One number per income head, each tied
-   to a document.
+   to a document. Preserve source-exact amounts, adjustments and portal-rounded
+   amounts separately. Track material gaps and superseded estimates in one
+   private working register. If asset disclosure applies, also read
+   [assets-and-bank-disclosures.md](references/assets-and-bank-disclosures.md);
+   collect the full bank-account list early, independently of asset totals.
 5. **Compare both regimes and choose.** Compute total tax under **both** the old
    and new regimes on the actual numbers and pick the lower — subject to the
    Form 10-IEA constraint for business filers. See "Choosing the regime" below
@@ -89,11 +96,14 @@ things that aren't real.
    the reverse.
 8. **Fill the portal schedule-by-schedule**, confirming each. See
    `references/portal-workflow.md` for the quirks that otherwise cost hours.
-9. **Resolve validation defects**, re-validate to zero errors.
-10. **Hand off** payment, submission, and e-verification to the user, with the
-    exact amount and the exact clicks.
-11. **Verify the final preview / JSON** against your independent computation
-    before the user submits.
+9. **Resolve validation defects** and verify each available validation stage.
+10. **Review the actual exported JSON/PDF** against both the independent
+    computation and the source/account inventory. Passing validation or matching
+    totals does not establish completeness or correct legal classification.
+11. **Hand off** payment, submission and e-verification with the exact amount
+    and actions. After user payment, verify the challan credit, recompute and
+    revalidate the updated return before submission. Retain a private next-year
+    handover of adjusted costs, taxed accruals and unresolved estimates.
 
 Use a task list and a final verification step — a wrong ITR has real penalties.
 
@@ -357,19 +367,20 @@ include the income. Being thorough here protects them.
 
 The e-filing SPA has specific, repeatable quirks (logout pop-ups on navigation,
 mat-select dropdowns that ignore coordinate clicks, a trailing-zero typing bug,
-schedules that silently un-confirm when an upstream schedule is edited, and a
-no-account-case balance-sheet defect that blocks presumptive returns). Each has a
-known workaround. Before driving the portal, read `references/portal-workflow.md`
-in full — it will save hours and prevent mis-clicks that corrupt a schedule.
+schedules that silently un-confirm when an upstream schedule is edited, and
+no-books balance-sheet validation defects). Before driving the portal, read
+`references/portal-workflow.md` for observed recovery methods. Investigate a
+defect that rejects supported facts rather than inventing values to bypass it.
 
-Golden rule for browser automation here: **prefer a precise DOM/JS click on the
-exact element over coordinate clicks**, because the page scroll position shifts
-between screenshot and click. Confirm each schedule, and after editing any
-schedule re-confirm everything downstream of it (especially Part B-TTI).
+Use the environment's supported browser/computer tools and fresh observations;
+prefer an exact semantic control when available. Do not execute arbitrary
+page-mutation JavaScript or use fixed coordinates from an earlier session.
+Verify displayed numeric values and server persistence. Confirm each schedule
+and recheck dependent schedules after edits, especially Part B-TI/TTI.
 
 ## Handing off — the user's three final acts
 
-When the return validates with zero errors, stop and hand off clearly:
+After validation and exported-return completeness review, hand off clearly:
 
 1. **Pay** the self-assessment tax (state exact amount + "Minor Head:
    Self-Assessment Tax (300)", AY). After payment the challan (BSR code, challan
@@ -382,8 +393,20 @@ When the return validates with zero errors, stop and hand off clearly:
 Then have the user download the **ITR-V / acknowledgement** and keep it with the
 challan and source documents.
 
+Do not describe an imported, confirmed or validated draft as filed. Report the
+actual next blocker and distinguish payment preparation, successful payment,
+submission and e-verification. Explain a large balance as income tax less
+credits plus interest/fees; explain asset-cost disclosures separately from
+taxable income. Ask one self-contained clarification when an amount could mean
+several things. Do not keep requesting precision-only reports after equivalent
+reliable evidence resolves the material issue.
+
 ## Reference files
 
+- [collection-and-coverage.md](references/collection-and-coverage.md) — adaptive
+  intake, report selection, coverage, overlap and private working-state controls.
+- [assets-and-bank-disclosures.md](references/assets-and-bank-disclosures.md) —
+  year-end held cost, related liabilities, bank-account completeness and estimates.
 - `references/tax-regimes-and-slabs.md` — old & new slabs, rebate, surcharge,
   cess, the regime decision, Form 10-IEA, senior-citizen slabs.
 - `references/deductions-old-regime.md` — the old-regime deduction catalogue

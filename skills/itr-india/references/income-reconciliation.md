@@ -1,10 +1,18 @@
 # Reconciling income to source documents
 
 The single most important discipline: **one number per income head, each tied to
-a document**. Build a small reconciliation table and don't move on until every
-figure has a source and the figures cross-tie. AIS/26AS are starting points, not
+a document**. Build a small reconciliation table with source coverage, exclusions,
+exact values and unresolved differences. Resolve material gaps before filing;
+a recorded, explicitly accepted approximation is not an exact source figure.
+AIS/26AS are starting points, not
 gospel — they can miss income (under-threshold banks, foreign platforms) and can
 double-count (e.g., the same payout seen by two reporters).
+
+Use [collection-and-coverage.md](collection-and-coverage.md) for the collection
+inventory, registrar/CAS coverage and overlap workflow; use
+[assets-and-bank-disclosures.md](assets-and-bank-disclosures.md) for year-end
+balances and retained asset cost. A newer or “consolidated” report is not proof
+of complete folio/account coverage. Check actual report contents and date range.
 
 ## The documents and what each gives you
 
@@ -59,16 +67,33 @@ for overlap — a payout already inside a 26AS entry must not be counted twice.
 The sum is gross receipts; the presumptive income is a % of it
 (see `creator-44ada.md`).
 
-**Interest:** Total the interest credits from **every** bank statement, not just
-the ones in AIS. Add HDFC + SBI + PNB + … = total savings-bank interest. In the
-new regime there is no 80TTA, so the whole amount is taxable. If a small bank's
-interest is absent from AIS, it still goes in — flag it to the user.
+**Interest:** Reconcile certificates, credits and relevant accruals from
+**every** bank, not just those in AIS. Establish the applicable consistent
+recognition method; a bank credit is evidence, not a universal cash-date rule.
+Separate savings, deposit and exempt-account interest, bridging opening taxed
+receivables and later postings without duplication. See the interest-method
+workflow in `capital-gains-other-sources.md`. In the new regime there is no
+80TTA; interest missing from AIS still needs appropriate disclosure.
 
-**Capital gains:** From the broker statement, per scrip: sale value − cost =
-gain, with the dates (for holding period) and STT flag (for 111A/112A special
-rates). Cross-check the sale proceeds credit in the bank.
+**Capital gains:** Choose a source per transaction, not a sum of report totals.
+Match registrar, broker and PMS records by ISIN, folio/account, sale date, units
+and consideration; keep the reason for excluding overlapping copies. Reconcile
+cost differences, gross proceeds versus net cash and source-summary controls.
+A bank credit is a cash check, not automatically the gain or gross consideration.
+See `capital-gains-other-sources.md` for lot, fee and corporate-action controls.
+Disposed-unit history and remaining year-end asset cost are separate controls.
 
-**Dividends:** From AIS / broker; taxable at slab rate in Schedule OS.
+**Dividends:** Reconcile payer/event-level AIS, broker and bank records rather
+than adding their annual totals. Check declaration/unconditional availability
+and prior-year inclusion around year boundaries; see the section 8 timing
+workflow in `capital-gains-other-sources.md`.
+
+**Exact sources versus portal rounding:** Retain source paise and document the
+integer values entered. Reconcile both annual payer totals and transaction-level
+rounding where prefill differs. Verify deducted/claimed TDS and saved schedule
+totals. Allocate a disclosed rounding residual where needed so period amounts
+sum to the rounded annual value; never hide a substantive mismatch as rounding.
+Keep the reconciliation after portal edits, not just an earlier calculation.
 
 ## Worked reconciliation pattern (illustrative)
 
@@ -96,8 +121,11 @@ OTHER SOURCES (interest)
 TOTAL INCOME                                 14,75,000
 ```
 
-The point of the table is that an auditor (or the user) can follow every rupee
-back to a document. If a number can't be sourced, stop and find the source.
+The table should let the user trace each figure to its source or a clearly
+labeled estimate. Distinguish verified facts, calculation differences and tax
+judgments. Use equivalent existing evidence before requesting another statement;
+collect more when it resolves a material classification, cost or income gap,
+not merely to eliminate documented immaterial precision differences.
 
 ## Mismatches — what to do
 
